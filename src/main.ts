@@ -22,23 +22,34 @@ function setupIntro(onComplete: () => void): void {
   )
   sections.forEach((section) => observer.observe(section))
 
-  let transitioned = false
+  let completed = false
 
   function checkScroll(): void {
-    if (transitioned) return
+    if (completed) return
     const scrollProgress = window.scrollY / (intro.scrollHeight - window.innerHeight)
 
     if (window.scrollY > 100 && scrollHint) scrollHint.classList.add('hidden')
+    if (window.scrollY <= 100 && scrollHint) scrollHint.classList.remove('hidden')
 
+    // Graph fades in gradually as you scroll
     if (scrollProgress > 0.3) {
-      graphContainer.style.opacity = String(Math.min((scrollProgress - 0.3) * 2, 0.4))
+      graphContainer.style.opacity = String(Math.min((scrollProgress - 0.3) * 1.5, 0.5))
+    } else {
+      graphContainer.style.opacity = '0'
     }
 
-    if (scrollProgress > 0.85) {
-      transitioned = true
+    // Intro text fades as you approach the bottom but stays readable
+    if (scrollProgress > 0.7) {
+      const fade = 1 - (scrollProgress - 0.7) / 0.25
+      intro.style.opacity = String(Math.max(fade, 0))
+    } else {
+      intro.style.opacity = '1'
+    }
+
+    // Only fully transition at the very bottom
+    if (scrollProgress > 0.95) {
+      completed = true
       observer.disconnect()
-      intro.style.transition = 'opacity 1s ease'
-      intro.style.opacity = '0'
       intro.style.pointerEvents = 'none'
       graphContainer.style.opacity = '1'
 
@@ -47,14 +58,14 @@ function setupIntro(onComplete: () => void): void {
         intro.style.display = 'none'
         window.scrollTo(0, 0)
         onComplete()
-      }, 1000)
+      }, 800)
     }
   }
 
   window.addEventListener('scroll', checkScroll, { passive: true })
 
   if (window.location.hash.length > 1) {
-    transitioned = true
+    completed = true
     intro.style.display = 'none'
     graphContainer.style.opacity = '1'
     document.body.classList.add('graph-active')
