@@ -95,8 +95,43 @@ function buildSidebar(nodes: PositionedNode[], renderer: MoleculeRenderer): void
       item.classList.remove('active')
     })
 
+    item.addEventListener('click', () => {
+      openEssay(node.id)
+    })
+
     list.appendChild(item)
   }
+}
+
+async function openEssay(id: string): Promise<void> {
+  const reader = document.getElementById('essay-reader')!
+  const content = reader.querySelector('.reader-content')!
+
+  content.innerHTML = '<p style="color: var(--text-dim);">Loading…</p>'
+  reader.classList.add('open')
+
+  const base = import.meta.env.BASE_URL
+  const resp = await fetch(`${base}essays/${id}.html`)
+  if (resp.ok) {
+    content.innerHTML = await resp.text()
+    content.scrollTop = 0
+  } else {
+    content.innerHTML = '<p style="color: var(--text-dim);">Essay not found.</p>'
+  }
+}
+
+function setupReader(): void {
+  const reader = document.getElementById('essay-reader')!
+  const closeBtn = reader.querySelector('.reader-close')!
+
+  closeBtn.addEventListener('click', () => {
+    reader.classList.remove('open')
+  })
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') reader.classList.remove('open')
+  })
 }
 
 function showSidebar(): void {
@@ -116,6 +151,7 @@ async function init(): Promise<void> {
   const nodes = computeLayout(data)
   renderer.buildScene(nodes, data.edges)
   buildSidebar(nodes, renderer)
+  setupReader()
 
   // Sidebar pulse sync — update active item glow in sync with renderer
   function syncSidebarPulse(): void {
