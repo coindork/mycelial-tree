@@ -1,5 +1,5 @@
 ---
-title: "Chirality and Agamben"
+title: "The Sovereign Hand"
 subtitle: "Exception, bare life, and the sovereign hand"
 date: 2026-03-03
 concepts: [chirality, Agamben, exception, bare-life, potentiality, profanation, witness, homo-sacer]

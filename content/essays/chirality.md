@@ -1,5 +1,5 @@
 ---
-title: "Chirality"
+title: "The Encounter"
 subtitle: "Ground-truth exploration"
 date: 2026-03-03
 concepts: [chirality, encounter, dream, glass, witness, self, other, mirror]

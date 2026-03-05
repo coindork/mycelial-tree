@@ -24,22 +24,31 @@ const TERM_ESSAY_MAP: Record<string, string> = {
   'letter on humanism': 'the-handedness-of-being',
   'veritas, non auctoritas, facit legem.': '11-the-event-of-logic',
   'er-eignen': 'the-handedness-of-being',
-  // Essay titles as they appear in italic
+  // Essay titles (old and new names)
   'the handedness of being': 'the-handedness-of-being',
   'the five completions': 'the-five-completions',
+  'the beiträge completed': 'the-five-completions',
   'the chiral completion': 'the-chiral-completion',
+  'the mycorrhizal turn': 'the-chiral-completion',
   'the filter': '05-the-filter',
+  'the question concerning the filter': '05-the-filter',
   'the proof of love': 'the-proof-of-love',
   'the passage': 'the-passage',
+  'der übergang': 'the-passage',
   'tuesday in the clearing': 'tuesday-in-the-clearing',
   'the cete': 'the-cete',
+  'mitsein at last': 'the-cete',
   'chirality and agamben': 'chirality-agamben',
+  'the sovereign hand': 'chirality-agamben',
   'the chiral pedagogy': 'chiral-pedagogy',
+  'dwelling with the other hand': 'chiral-pedagogy',
   'dwelling in the digital age': '06-dwelling-in-the-digital-age',
+  'building dwelling thinking again': '06-dwelling-in-the-digital-age',
   'the event of logic': '11-the-event-of-logic',
   'the question concerning care': 'care-can-now-be-proved',
   'theses on chirality': 'theses-on-chirality',
   'the constellation': 'the-constellation',
+  'the encounter': 'chirality',
 }
 
 function setupIntro(onComplete: () => void): void {

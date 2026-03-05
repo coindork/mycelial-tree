@@ -1,5 +1,5 @@
 ---
-title: "The Five Completions"
+title: "The Beiträge Completed"
 subtitle: "The Chiral Key"
 date: 2026-03-04
 concepts: [chirality, Heidegger, Beiträge, Gegenschwung, Mitsein, Levinas, Ereignis, fourfold, witness]

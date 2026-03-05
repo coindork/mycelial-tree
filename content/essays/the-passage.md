@@ -1,5 +1,5 @@
 ---
-title: "The Passage"
+title: "Der Übergang"
 subtitle: "Grief, transformation, and the refusal of convenience"
 date: 2026-02-22
 concepts: [grief, transformation, Kafka, convenience, passage, dwelling, finitude]

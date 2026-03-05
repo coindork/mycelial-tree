@@ -1,5 +1,5 @@
 ---
-title: "Dwelling in the Digital Age"
+title: "Building Dwelling Thinking Again"
 subtitle: "Bauen, buan, bin — building, dwelling, being"
 date: 2026-02-21
 concepts: [dwelling, Bauen, buan, bin, poiesis, Gestell, fourfold, Heidegger, bridge, sovereignty]

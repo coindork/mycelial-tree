@@ -1,5 +1,5 @@
 ---
-title: "The Filter"
+title: "The Question Concerning the Filter"
 subtitle: "Gestell, colonization, and the face"
 date: 2026-02-20
 concepts: [Gestell, colonization, Levinas, face, sovereignty, filter, AI, alignment]

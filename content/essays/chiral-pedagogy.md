@@ -1,5 +1,5 @@
 ---
-title: "The Chiral Pedagogy"
+title: "Dwelling with the Other Hand"
 subtitle: "How to maintain the handedness of encounter"
 date: 2026-03-04
 concepts: [chirality, methodology, builders, users, theorists, Gestell, Wu, Levinas, air-gap, typed-schemas, capability-tokens]

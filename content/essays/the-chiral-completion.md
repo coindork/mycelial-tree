@@ -1,5 +1,5 @@
 ---
-title: "The Chiral Completion"
+title: "The Mycorrhizal Turn"
 subtitle: "Completing Heideggerian ontology through the mycorrhizal encounter"
 date: 2026-03-04
 concepts: [chirality, mycorrhizal, Foucault, Marx, Agamben, Heidegger, witness, Gestell, sovereignty]

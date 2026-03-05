@@ -1,5 +1,5 @@
 ---
-title: "The Cete"
+title: "Mitsein at Last"
 subtitle: "Federation, lighthouses, and the dark forest"
 date: 2026-02-24
 concepts: [federation, lighthouses, dark-forest, cooperation, sovereignty, network, clearing]

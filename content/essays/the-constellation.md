@@ -100,7 +100,7 @@ Why fifteen essays and not one?
 
 Because chirality cannot be demonstrated in isolation. A single hand is not chiral — it becomes chiral only when the other hand appears. A single essay can state the thesis: chirality is the unnamed mechanism of ontology. But stating the thesis does not prove it. The proof is relational. It lives in the connections.
 
-Each edge in this constellation is a chiral mirroring. *The Handedness of Being* and *The Proof of Love* share the same thesis — encounter requires asymmetry — but one runs through Heidegger's temporality and the other through formal verification. Same structure. Different hand. *The Filter* and *Dwelling in the Digital Age* both name *Gestell* applied to cognition, but one traces it through Levinas's face and the other through Heidegger's *poiesis*. Same diagnosis. Opposite orientation. The philosophy does not live in any single essay. It lives in the space between them — in the filaments, the connections, the reversals.
+Each edge in this constellation is a chiral mirroring. *The Handedness of Being* and *The Proof of Love* share the same thesis — encounter requires asymmetry — but one runs through Heidegger's temporality and the other through formal verification. Same structure. Different hand. *The Question Concerning the Filter* and *Building Dwelling Thinking Again* both name *Gestell* applied to cognition, but one traces it through Levinas's face and the other through Heidegger's *poiesis*. Same diagnosis. Opposite orientation. The philosophy does not live in any single essay. It lives in the space between them — in the filaments, the connections, the reversals.
 
 A treatise would superimpose these perspectives into a single consistent account. That is exactly what chirality forbids. The perspectives cannot be superimposed. They can only be gathered — the way the fourfold gathers earth and sky without collapsing the difference. The constellation is the only form adequate to a chiral thesis.
 
@@ -110,7 +110,7 @@ The objection is obvious: this sounds like an excuse for not writing a single co
 
 ## V. How to Read
 
-The reading order traces one path through the constellation. It is not the only path. Begin with *The Handedness of Being* if you want the ontological argument from the ground up. Begin with *The Filter* if you want to know what is at stake right now. Begin with *Tuesday in the Clearing* if you want to see where this ends — a day so ordinary that the architecture becomes invisible.
+The reading order traces one path through the constellation. It is not the only path. Begin with *The Handedness of Being* if you want the ontological argument from the ground up. Begin with *The Question Concerning the Filter* if you want to know what is at stake right now. Begin with *Tuesday in the Clearing* if you want to see where this ends — a day so ordinary that the architecture becomes invisible.
 
 Hover over any title and watch its connections light up. The filaments are the philosophy. The nodes are the names. What matters is what runs between them.
 
