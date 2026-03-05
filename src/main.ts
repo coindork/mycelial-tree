@@ -155,6 +155,47 @@ async function init(): Promise<void> {
     canvas.style.cursor = closest ? 'pointer' : 'default'
   })
 
+  // --- Clamp transform to keep graph visible ---
+  const MIN_ZOOM = 0.3
+  const MAX_ZOOM = 3.0
+
+  function clampTransform(): void {
+    // Clamp zoom
+    transform.k = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, transform.k))
+
+    // Find bounding box of all nodes
+    const nodes = simulation.nodes()
+    if (nodes.length === 0) return
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+    for (const n of nodes) {
+      if (n.x < minX) minX = n.x
+      if (n.y < minY) minY = n.y
+      if (n.x > maxX) maxX = n.x
+      if (n.y > maxY) maxY = n.y
+    }
+
+    // Add padding around the graph bounds
+    const pad = 200
+    const graphW = (maxX - minX) + pad * 2
+    const graphH = (maxY - minY) + pad * 2
+    const centerX = (minX + maxX) / 2
+    const centerY = (minY + maxY) / 2
+
+    const vw = renderer.width
+    const vh = renderer.height
+
+    // Don't let the graph's center go more than half a viewport away from screen center
+    const maxPanX = vw * 0.5
+    const maxPanY = vh * 0.5
+
+    const idealX = vw / 2 - centerX * transform.k
+    const idealY = vh / 2 - centerY * transform.k
+
+    transform.x = Math.max(idealX - maxPanX, Math.min(idealX + maxPanX, transform.x))
+    transform.y = Math.max(idealY - maxPanY, Math.min(idealY + maxPanY, transform.y))
+  }
+
   // --- Zoom ---
   canvas.addEventListener('wheel', (e: WheelEvent) => {
     e.preventDefault()
@@ -169,6 +210,7 @@ async function init(): Promise<void> {
     transform.x = mouseX - (mouseX - transform.x) * (newK / transform.k)
     transform.y = mouseY - (mouseY - transform.y) * (newK / transform.k)
     transform.k = newK
+    clampTransform()
   }, { passive: false })
 
   // --- Pan ---
@@ -184,6 +226,7 @@ async function init(): Promise<void> {
     if (!isPanning) return
     transform.x = e.clientX - panStart.x
     transform.y = e.clientY - panStart.y
+    clampTransform()
   })
 
   window.addEventListener('mouseup', () => {
