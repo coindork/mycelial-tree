@@ -1,9 +1,8 @@
-import { computeLayout, BOOK_ORDER } from './graph/force'
-import { GraphRenderer } from './graph/renderer'
-import type { StaticNode } from './graph/renderer'
+import { computeLayout } from './graph/force'
+import { MoleculeRenderer } from './graph/renderer'
+import type { PositionedNode } from './graph/force'
 import type { GraphData } from './data/types'
 
-// --- Intro scroll handling ---
 function setupIntro(onComplete: () => void): void {
   const intro = document.getElementById('intro')!
   const sections = document.querySelectorAll('.intro-section')
@@ -16,14 +15,11 @@ function setupIntro(onComplete: () => void): void {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible')
-        }
+        if (entry.isIntersecting) entry.target.classList.add('visible')
       })
     },
     { threshold: 0.3 }
   )
-
   sections.forEach((section) => observer.observe(section))
 
   let transitioned = false
@@ -32,9 +28,7 @@ function setupIntro(onComplete: () => void): void {
     if (transitioned) return
     const scrollProgress = window.scrollY / (intro.scrollHeight - window.innerHeight)
 
-    if (window.scrollY > 100 && scrollHint) {
-      scrollHint.classList.add('hidden')
-    }
+    if (window.scrollY > 100 && scrollHint) scrollHint.classList.add('hidden')
 
     if (scrollProgress > 0.3) {
       graphContainer.style.opacity = String(Math.min((scrollProgress - 0.3) * 2, 0.4))
@@ -68,55 +62,35 @@ function setupIntro(onComplete: () => void): void {
   }
 }
 
-function buildReadingOrder(allNodes: StaticNode[]): HTMLElement {
-  const panel = document.getElementById('reading-order')!
-  const list = panel.querySelector('.order-list')!
-
-  // Sort by book order
-  const ordered = [...allNodes].sort((a, b) => a.bookOrder - b.bookOrder)
+function buildSidebar(nodes: PositionedNode[], renderer: MoleculeRenderer): void {
+  const list = document.querySelector('.sidebar-list')!
+  const ordered = [...nodes].sort((a, b) => a.bookOrder - b.bookOrder)
 
   for (const node of ordered) {
     const item = document.createElement('div')
-    item.className = 'order-item'
+    item.className = 'sidebar-item'
     item.dataset.nodeId = node.id
-    item.innerHTML = `<span class="order-num">${node.bookOrder}.</span><span class="order-title">${node.title}</span>`
+    item.innerHTML = `<span class="item-num">${node.bookOrder}.</span><span class="item-title">${node.title}</span>`
+
+    item.addEventListener('mouseenter', () => {
+      renderer.highlightedNodeId = node.id
+      list.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'))
+      item.classList.add('active')
+    })
+
+    item.addEventListener('mouseleave', () => {
+      renderer.highlightedNodeId = null
+      item.classList.remove('active')
+    })
+
     list.appendChild(item)
   }
-
-  return panel
 }
 
-function updateReadingOrder(hoveredNode: StaticNode | null, allNodes: StaticNode[]): void {
-  const panel = document.getElementById('reading-order')!
-  const items = panel.querySelectorAll('.order-item')
-
-  if (!hoveredNode) {
-    panel.classList.remove('active')
-    return
-  }
-
-  panel.classList.add('active')
-
-  // Find connected node IDs
-  const connectedIds = new Set<string>()
-  connectedIds.add(hoveredNode.id)
-
-  items.forEach((item) => {
-    const el = item as HTMLElement
-    const nodeId = el.dataset.nodeId!
-
-    if (nodeId === hoveredNode.id) {
-      el.className = 'order-item current'
-    } else {
-      el.className = 'order-item'
-    }
-  })
-
-  // Scroll the current item into view
-  const currentItem = panel.querySelector('.order-item.current')
-  if (currentItem) {
-    currentItem.scrollIntoView({ block: 'center', behavior: 'smooth' })
-  }
+function showSidebar(): void {
+  setTimeout(() => {
+    document.getElementById('sidebar')!.classList.add('visible')
+  }, 2000)
 }
 
 async function init(): Promise<void> {
@@ -125,27 +99,20 @@ async function init(): Promise<void> {
   const data: GraphData = await resp.json()
 
   const container = document.getElementById('graph-container')!
-  const renderer = new GraphRenderer(container)
+  const renderer = new MoleculeRenderer(container)
 
-  // Compute static layout
-  const nodes = computeLayout(data, renderer.width, renderer.height)
-  renderer.setData(nodes, data.edges)
-
-  // Build reading order panel
-  buildReadingOrder(nodes)
-
-  // Hover handler — show reading order
-  renderer.setHoverHandler((node) => {
-    updateReadingOrder(node, nodes)
-  })
+  const nodes = computeLayout(data)
+  renderer.buildScene(nodes, data.edges)
+  buildSidebar(nodes, renderer)
 
   setupIntro(() => {
     renderer.start()
+    showSidebar()
   })
 
-  // If skipping intro, start immediately
   if (window.location.hash.length > 1) {
     renderer.start()
+    showSidebar()
   }
 }
 

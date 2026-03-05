@@ -1,9 +1,10 @@
 import * as d3 from 'd3'
 import type { GraphData, GraphNode, GraphEdge } from '../data/types'
-import type { StaticNode } from './renderer'
+
+const FEATURED_NODE_ID = 'the-handedness-of-being'
 
 // Reading order — the essays as a book
-const BOOK_ORDER: string[] = [
+export const BOOK_ORDER: string[] = [
   'the-handedness-of-being',
   'theses-on-chirality',
   'the-five-completions',
@@ -21,6 +22,14 @@ const BOOK_ORDER: string[] = [
   'the-cete',
 ]
 
+export interface PositionedNode extends GraphNode {
+  x: number
+  y: number
+  z: number
+  radius: number
+  bookOrder: number
+}
+
 interface ForceNode extends GraphNode {
   x: number
   y: number
@@ -30,14 +39,18 @@ interface ForceNode extends GraphNode {
 
 type ForceEdge = d3.SimulationLinkDatum<ForceNode> & GraphEdge
 
-/**
- * Run force simulation to completion and return static positioned nodes.
- */
-export function computeLayout(data: GraphData, width: number, height: number): StaticNode[] {
+function initZ(node: GraphNode): number {
+  if (node.id === FEATURED_NODE_ID) return 0
+  if (node.hand === 'left') return -40 + (Math.random() - 0.5) * 60
+  if (node.hand === 'right') return 40 + (Math.random() - 0.5) * 60
+  return (Math.random() - 0.5) * 30
+}
+
+export function computeLayout(data: GraphData): PositionedNode[] {
   const nodes: ForceNode[] = data.nodes.map((n) => ({
     ...n,
-    x: width / 2 + (Math.random() - 0.5) * width * 0.4,
-    y: height / 2 + (Math.random() - 0.5) * height * 0.4,
+    x: (Math.random() - 0.5) * 200,
+    y: (Math.random() - 0.5) * 200,
     vx: 0,
     vy: 0,
   }))
@@ -54,44 +67,37 @@ export function computeLayout(data: GraphData, width: number, height: number): S
     .forceSimulation<ForceNode, ForceEdge>(nodes)
     .force(
       'link',
-      d3
-        .forceLink<ForceNode, ForceEdge>(edges)
+      d3.forceLink<ForceNode, ForceEdge>(edges)
         .id((d) => d.id)
-        .distance((d) => {
-          const weight = (d as ForceEdge).weight
-          return Math.max(50, 180 / Math.max(weight, 0.1))
-        })
-        .strength(0.3)
+        .distance((d) => Math.max(30, 120 / Math.max((d as ForceEdge).weight, 0.1)))
+        .strength(0.4)
     )
-    .force(
-      'charge',
-      d3.forceManyBody<ForceNode>().strength((d) =>
-        connectedIds.has(d.id) ? -400 : -150
-      )
-    )
-    .force('center', d3.forceCenter(width / 2, height / 2).strength(0.05))
-    .force(
-      'collision',
-      d3.forceCollide<ForceNode>().radius(40).strength(0.8)
-    )
+    .force('charge', d3.forceManyBody<ForceNode>().strength((d) =>
+      connectedIds.has(d.id) ? -200 : -80
+    ))
+    .force('center', d3.forceCenter(0, 0).strength(0.05))
+    .force('collision', d3.forceCollide<ForceNode>().radius(20).strength(0.7))
     .stop()
 
-  // Run to completion
-  for (let i = 0; i < 300; i++) {
-    simulation.tick()
+  for (let i = 0; i < 300; i++) simulation.tick()
+
+  // Recenter on featured node
+  const featured = nodes.find((n) => n.id === FEATURED_NODE_ID)
+  if (featured) {
+    const dx = featured.x, dy = featured.y
+    for (const node of nodes) { node.x -= dx; node.y -= dy }
   }
 
-  // Convert to static nodes with book order and radius
-  return nodes.map((n): StaticNode => {
+  return nodes.map((n): PositionedNode => {
     const orderIndex = BOOK_ORDER.indexOf(n.id)
-    const baseRadius = Math.max(5, Math.min(14, 3 + n.connectionCount * 1.5))
+    const baseRadius = 2 + n.connectionCount * 0.8
+    const radius = n.id === FEATURED_NODE_ID ? baseRadius * 1.5 : baseRadius
 
     return {
       ...n,
-      radius: baseRadius,
+      z: initZ(n),
+      radius,
       bookOrder: orderIndex >= 0 ? orderIndex + 1 : 99,
     }
   })
 }
-
-export { BOOK_ORDER }
