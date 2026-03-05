@@ -31,23 +31,23 @@ function setupIntro(onComplete: () => void): void {
     if (window.scrollY > 100 && scrollHint) scrollHint.classList.add('hidden')
     if (window.scrollY <= 100 && scrollHint) scrollHint.classList.remove('hidden')
 
-    // Graph fades in gradually as you scroll
-    if (scrollProgress > 0.3) {
-      graphContainer.style.opacity = String(Math.min((scrollProgress - 0.3) * 1.5, 0.5))
+    // Graph only starts appearing very late
+    if (scrollProgress > 0.8) {
+      graphContainer.style.opacity = String(Math.min((scrollProgress - 0.8) * 3, 0.4))
     } else {
       graphContainer.style.opacity = '0'
     }
 
-    // Intro text fades as you approach the bottom but stays readable
-    if (scrollProgress > 0.7) {
-      const fade = 1 - (scrollProgress - 0.7) / 0.25
+    // Intro text stays fully visible until 90%, then fades
+    if (scrollProgress > 0.9) {
+      const fade = 1 - (scrollProgress - 0.9) / 0.08
       intro.style.opacity = String(Math.max(fade, 0))
     } else {
       intro.style.opacity = '1'
     }
 
-    // Only fully transition at the very bottom
-    if (scrollProgress > 0.95) {
+    // Only transition at the absolute bottom
+    if (scrollProgress > 0.98) {
       completed = true
       observer.disconnect()
       intro.style.pointerEvents = 'none'

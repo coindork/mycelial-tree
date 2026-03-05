@@ -1,4 +1,5 @@
-import type { GraphData, GraphNode } from '../data/types'
+import * as d3 from 'd3'
+import type { GraphData, GraphNode, GraphEdge } from '../data/types'
 
 const FEATURED_NODE_ID = 'the-handedness-of-being'
 
@@ -28,73 +29,101 @@ export interface PositionedNode extends GraphNode {
   bookOrder: number
 }
 
-/**
- * Crystal geometry: center node + two shells.
- *
- * Shell 1 (inner, 6 nodes): octahedron vertices — the most connected essays
- * Shell 2 (outer, 8 nodes): cube vertices — the remaining essays
- *
- * This creates a cuboctahedral crystal: an octahedron nested inside a cube,
- * with the central thesis at the origin.
- */
-function crystalPositions(): { x: number; y: number; z: number }[] {
-  const R1 = 55  // inner shell radius (octahedron)
-  const R2 = 85  // outer shell radius (cube)
-
-  // Position 0: center
-  const center = { x: 0, y: 0, z: 0 }
-
-  // Positions 1-6: octahedron vertices (inner shell)
-  const octahedron = [
-    { x: R1, y: 0, z: 0 },
-    { x: -R1, y: 0, z: 0 },
-    { x: 0, y: R1, z: 0 },
-    { x: 0, y: -R1, z: 0 },
-    { x: 0, y: 0, z: R1 },
-    { x: 0, y: 0, z: -R1 },
-  ]
-
-  // Positions 7-14: cube vertices (outer shell)
-  const d = R2 / Math.sqrt(3) // distance so vertex is at R2 from origin
-  const cube = [
-    { x: d, y: d, z: d },
-    { x: d, y: d, z: -d },
-    { x: d, y: -d, z: d },
-    { x: d, y: -d, z: -d },
-    { x: -d, y: d, z: d },
-    { x: -d, y: d, z: -d },
-    { x: -d, y: -d, z: d },
-    { x: -d, y: -d, z: -d },
-  ]
-
-  return [center, ...octahedron, ...cube]
+interface ForceNode extends GraphNode {
+  x: number
+  y: number
+  vx: number
+  vy: number
 }
 
+type ForceEdge = d3.SimulationLinkDatum<ForceNode> & GraphEdge
+
 /**
- * Sort nodes so the most-connected go to the center and inner shell,
- * and the least-connected go to the outer shell.
+ * Word-cloud / association layout:
+ * - Connected nodes pull close together (short link distance)
+ * - Node size proportional to connectionCount (word cloud effect)
+ * - Gentle charge keeps things from overlapping
+ * - Z-axis adds depth based on hand property
+ * - Featured node pinned at center
  */
 export function computeLayout(data: GraphData): PositionedNode[] {
-  // Sort by connection count descending (featured node forced to index 0)
-  const sorted = [...data.nodes].sort((a, b) => {
-    if (a.id === FEATURED_NODE_ID) return -1
-    if (b.id === FEATURED_NODE_ID) return 1
-    return b.connectionCount - a.connectionCount
-  })
+  const nodes: ForceNode[] = data.nodes.map((n) => ({
+    ...n,
+    x: (Math.random() - 0.5) * 100,
+    y: (Math.random() - 0.5) * 100,
+    vx: 0,
+    vy: 0,
+  }))
 
-  const positions = crystalPositions()
+  // Pin featured node at center
+  const featured = nodes.find(n => n.id === FEATURED_NODE_ID)
+  if (featured) {
+    featured.x = 0
+    featured.y = 0
+    ;(featured as any).fx = 0
+    ;(featured as any).fy = 0
+  }
 
-  return sorted.map((node, i): PositionedNode => {
-    const pos = positions[i] || { x: 0, y: 0, z: 0 }
-    const orderIndex = BOOK_ORDER.indexOf(node.id)
-    const baseRadius = 2 + node.connectionCount * 0.8
-    const radius = node.id === FEATURED_NODE_ID ? baseRadius * 1.5 : baseRadius
+  const edges: ForceEdge[] = data.edges.map((e) => ({ ...e }))
+
+  const simulation = d3
+    .forceSimulation<ForceNode, ForceEdge>(nodes)
+    .force(
+      'link',
+      d3.forceLink<ForceNode, ForceEdge>(edges)
+        .id((d) => d.id)
+        .distance((d) => {
+          // Strongly connected nodes cluster tight
+          const weight = (d as ForceEdge).weight
+          return weight >= 3 ? 25 : 45
+        })
+        .strength(0.6)
+    )
+    .force(
+      'charge',
+      d3.forceManyBody<ForceNode>().strength(-80)
+    )
+    .force('center', d3.forceCenter(0, 0).strength(0.03))
+    .force(
+      'collision',
+      d3.forceCollide<ForceNode>().radius((d) => {
+        // Bigger collision radius for bigger nodes — word cloud spacing
+        const r = 2 + d.connectionCount * 0.8
+        return r * 3 + 8
+      }).strength(0.9)
+    )
+    .stop()
+
+  // Run to completion
+  for (let i = 0; i < 400; i++) simulation.tick()
+
+  // Release pin
+  if (featured) {
+    ;(featured as any).fx = null
+    ;(featured as any).fy = null
+  }
+
+  // Recenter
+  if (featured) {
+    const dx = featured.x, dy = featured.y
+    for (const node of nodes) { node.x -= dx; node.y -= dy }
+  }
+
+  return nodes.map((n): PositionedNode => {
+    const orderIndex = BOOK_ORDER.indexOf(n.id)
+    const baseRadius = 2 + n.connectionCount * 0.8
+    const radius = n.id === FEATURED_NODE_ID ? baseRadius * 1.5 : baseRadius
+
+    // Z from hand property — gives depth
+    let z = (Math.random() - 0.5) * 20
+    if (n.id !== FEATURED_NODE_ID) {
+      if (n.hand === 'left') z -= 25
+      else if (n.hand === 'right') z += 25
+    }
 
     return {
-      ...node,
-      x: pos.x,
-      y: pos.y,
-      z: pos.z,
+      ...n,
+      z,
       radius,
       bookOrder: orderIndex >= 0 ? orderIndex + 1 : 99,
     }
