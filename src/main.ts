@@ -7,7 +7,8 @@ import type { ForceLink, ForceCenter } from 'd3-force'
 
 async function init(): Promise<void> {
   // Fetch graph data
-  const resp = await fetch('/graph.json')
+  const base = import.meta.env.BASE_URL
+  const resp = await fetch(`${base}graph.json`)
   const data: GraphData = await resp.json()
 
   // Set up renderer

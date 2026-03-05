@@ -24,7 +24,8 @@ export class ReadingPane {
     // Fetch essay HTML
     let essayHtml = ''
     try {
-      const resp = await fetch(`/essays/${node.id}.html`)
+      const base = import.meta.env.BASE_URL
+      const resp = await fetch(`${base}essays/${node.id}.html`)
       if (resp.ok) {
         essayHtml = await resp.text()
       } else {
