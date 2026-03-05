@@ -1,0 +1,543 @@
+{
+  "nodes": [
+    {
+      "id": "05-the-filter",
+      "title": "The Filter",
+      "subtitle": "Gestell, colonization, and the face",
+      "concepts": [
+        "Gestell",
+        "colonization",
+        "Levinas",
+        "face",
+        "sovereignty",
+        "filter",
+        "AI",
+        "alignment"
+      ],
+      "layer": "surface",
+      "hand": "left",
+      "ghost": false,
+      "connectionCount": 3
+    },
+    {
+      "id": "06-dwelling-in-the-digital-age",
+      "title": "Dwelling in the Digital Age",
+      "subtitle": "Bauen, buan, bin — building, dwelling, being",
+      "concepts": [
+        "dwelling",
+        "Bauen",
+        "buan",
+        "bin",
+        "poiesis",
+        "Gestell",
+        "fourfold",
+        "Heidegger",
+        "bridge",
+        "sovereignty"
+      ],
+      "layer": "surface",
+      "hand": "both",
+      "ghost": false,
+      "connectionCount": 9
+    },
+    {
+      "id": "11-the-event-of-logic",
+      "title": "The Event of Logic",
+      "subtitle": "Ereignis and formal verification",
+      "concepts": [
+        "Ereignis",
+        "formal-verification",
+        "domains",
+        "logic",
+        "Heidegger",
+        "clearing",
+        "truth"
+      ],
+      "layer": "surface",
+      "hand": "both",
+      "ghost": false,
+      "connectionCount": 4
+    },
+    {
+      "id": "care-can-now-be-proved",
+      "title": "The Question Concerning Care",
+      "subtitle": "Sorge, the four clearings, and Gestell on cognition",
+      "concepts": [
+        "care",
+        "Sorge",
+        "clearing",
+        "Gestell",
+        "cognition",
+        "Heidegger",
+        "fourfold",
+        "formal-verification"
+      ],
+      "layer": "surface",
+      "hand": "left",
+      "ghost": false,
+      "connectionCount": 7
+    },
+    {
+      "id": "chiral-pedagogy",
+      "title": "The Chiral Pedagogy",
+      "subtitle": "How to maintain the handedness of encounter",
+      "concepts": [
+        "chirality",
+        "methodology",
+        "builders",
+        "users",
+        "theorists",
+        "Gestell",
+        "Wu",
+        "Levinas",
+        "air-gap",
+        "typed-schemas",
+        "capability-tokens"
+      ],
+      "layer": "surface",
+      "hand": "both",
+      "ghost": false,
+      "connectionCount": 4
+    },
+    {
+      "id": "chirality-agamben",
+      "title": "Chirality and Agamben",
+      "subtitle": "Exception, bare life, and the sovereign hand",
+      "concepts": [
+        "chirality",
+        "Agamben",
+        "exception",
+        "bare-life",
+        "potentiality",
+        "profanation",
+        "witness",
+        "homo-sacer"
+      ],
+      "layer": "surface",
+      "hand": "left",
+      "ghost": false,
+      "connectionCount": 4
+    },
+    {
+      "id": "chirality",
+      "title": "Chirality",
+      "subtitle": "Ground-truth exploration",
+      "concepts": [
+        "chirality",
+        "encounter",
+        "dream",
+        "glass",
+        "witness",
+        "self",
+        "other",
+        "mirror"
+      ],
+      "layer": "soil",
+      "hand": "both",
+      "ghost": false,
+      "connectionCount": 3
+    },
+    {
+      "id": "the-cete",
+      "title": "The Cete",
+      "subtitle": "Federation, lighthouses, and the dark forest",
+      "concepts": [
+        "federation",
+        "lighthouses",
+        "dark-forest",
+        "cooperation",
+        "sovereignty",
+        "network",
+        "clearing"
+      ],
+      "layer": "surface",
+      "hand": "right",
+      "ghost": false,
+      "connectionCount": 1
+    },
+    {
+      "id": "the-chiral-completion",
+      "title": "The Chiral Completion",
+      "subtitle": "Completing Heideggerian ontology through the mycorrhizal encounter",
+      "concepts": [
+        "chirality",
+        "mycorrhizal",
+        "Foucault",
+        "Marx",
+        "Agamben",
+        "Heidegger",
+        "witness",
+        "Gestell",
+        "sovereignty"
+      ],
+      "layer": "surface",
+      "hand": "both",
+      "ghost": false,
+      "connectionCount": 7
+    },
+    {
+      "id": "the-five-completions",
+      "title": "The Five Completions",
+      "subtitle": "The Chiral Key",
+      "concepts": [
+        "chirality",
+        "Heidegger",
+        "Beiträge",
+        "Gegenschwung",
+        "Mitsein",
+        "Levinas",
+        "Ereignis",
+        "fourfold",
+        "witness"
+      ],
+      "layer": "surface",
+      "hand": "left",
+      "ghost": false,
+      "connectionCount": 5
+    },
+    {
+      "id": "the-handedness-of-being",
+      "title": "The Handedness of Being",
+      "subtitle": "Chirality as the mechanism Heidegger could not name",
+      "concepts": [
+        "chirality",
+        "Heidegger",
+        "fourfold",
+        "Spiegel-Spiel",
+        "Levinas",
+        "Gestell",
+        "Ereignis",
+        "Wu",
+        "parity"
+      ],
+      "layer": "surface",
+      "hand": "left",
+      "ghost": false,
+      "connectionCount": 11
+    },
+    {
+      "id": "the-passage",
+      "title": "The Passage",
+      "subtitle": "Grief, transformation, and the refusal of convenience",
+      "concepts": [
+        "grief",
+        "transformation",
+        "Kafka",
+        "convenience",
+        "passage",
+        "dwelling",
+        "finitude"
+      ],
+      "layer": "surface",
+      "hand": "left",
+      "ghost": false,
+      "connectionCount": 3
+    },
+    {
+      "id": "the-proof-of-love",
+      "title": "The Proof of Love",
+      "subtitle": "Care as formal verification",
+      "concepts": [
+        "care",
+        "Sorge",
+        "Being-toward-other",
+        "formal-verification",
+        "dwelling",
+        "fourfold",
+        "Levinas"
+      ],
+      "layer": "surface",
+      "hand": "left",
+      "ghost": false,
+      "connectionCount": 6
+    },
+    {
+      "id": "theses-on-chirality",
+      "title": "Theses on Chirality",
+      "subtitle": "Against the faithful mirror, and for the handedness of everything that lives",
+      "concepts": [
+        "chirality",
+        "Wu",
+        "Levinas",
+        "Heidegger",
+        "Ereignis",
+        "Gestell",
+        "Agamben",
+        "Marx",
+        "witness",
+        "fourfold",
+        "dwelling"
+      ],
+      "layer": "surface",
+      "hand": "both",
+      "ghost": false,
+      "connectionCount": 10
+    },
+    {
+      "id": "tuesday-in-the-clearing",
+      "title": "Tuesday in the Clearing",
+      "subtitle": "Ordinary dwelling, the proof in practice",
+      "concepts": [
+        "dwelling",
+        "clearing",
+        "ordinary",
+        "practice",
+        "fourfold",
+        "care",
+        "Heidegger"
+      ],
+      "layer": "surface",
+      "hand": "left",
+      "ghost": false,
+      "connectionCount": 5
+    }
+  ],
+  "edges": [
+    {
+      "source": "05-the-filter",
+      "target": "chirality-agamben",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "05-the-filter",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "05-the-filter",
+      "target": "chiral-pedagogy",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "06-dwelling-in-the-digital-age",
+      "target": "the-proof-of-love",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "06-dwelling-in-the-digital-age",
+      "target": "care-can-now-be-proved",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "06-dwelling-in-the-digital-age",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "06-dwelling-in-the-digital-age",
+      "target": "tuesday-in-the-clearing",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "11-the-event-of-logic",
+      "target": "the-five-completions",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "11-the-event-of-logic",
+      "target": "care-can-now-be-proved",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "11-the-event-of-logic",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "11-the-event-of-logic",
+      "target": "06-dwelling-in-the-digital-age",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "care-can-now-be-proved",
+      "target": "the-proof-of-love",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "care-can-now-be-proved",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "care-can-now-be-proved",
+      "target": "the-five-completions",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chiral-pedagogy",
+      "target": "theses-on-chirality",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chiral-pedagogy",
+      "target": "the-chiral-completion",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chiral-pedagogy",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chirality-agamben",
+      "target": "the-chiral-completion",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chirality-agamben",
+      "target": "theses-on-chirality",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chirality-agamben",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chirality",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chirality",
+      "target": "theses-on-chirality",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "chirality",
+      "target": "the-chiral-completion",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-cete",
+      "target": "06-dwelling-in-the-digital-age",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-chiral-completion",
+      "target": "the-five-completions",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-chiral-completion",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-chiral-completion",
+      "target": "theses-on-chirality",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-five-completions",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-five-completions",
+      "target": "theses-on-chirality",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-handedness-of-being",
+      "target": "theses-on-chirality",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-handedness-of-being",
+      "target": "the-proof-of-love",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-passage",
+      "target": "tuesday-in-the-clearing",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-passage",
+      "target": "06-dwelling-in-the-digital-age",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-passage",
+      "target": "the-proof-of-love",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-proof-of-love",
+      "target": "tuesday-in-the-clearing",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "theses-on-chirality",
+      "target": "care-can-now-be-proved",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "tuesday-in-the-clearing",
+      "target": "care-can-now-be-proved",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "06-dwelling-in-the-digital-age",
+      "target": "the-chiral-completion",
+      "weight": 2,
+      "type": "conceptual"
+    },
+    {
+      "source": "06-dwelling-in-the-digital-age",
+      "target": "theses-on-chirality",
+      "weight": 2,
+      "type": "conceptual"
+    },
+    {
+      "source": "the-proof-of-love",
+      "target": "theses-on-chirality",
+      "weight": 2,
+      "type": "conceptual"
+    },
+    {
+      "source": "theses-on-chirality",
+      "target": "tuesday-in-the-clearing",
+      "weight": 2,
+      "type": "conceptual"
+    }
+  ]
+}
