@@ -3,6 +3,45 @@ import { MoleculeRenderer } from './graph/renderer'
 import type { PositionedNode } from './graph/force'
 import type { GraphData } from './data/types'
 
+// Map italic/orange terms in essays to the essay they reference
+const TERM_ESSAY_MAP: Record<string, string> = {
+  // Philosophical terms → primary essay
+  'chirality': 'chirality',
+  'ereignis': 'the-handedness-of-being',
+  'mitsein': 'the-handedness-of-being',
+  'dasein': 'the-handedness-of-being',
+  'das man': 'the-handedness-of-being',
+  'sorge': 'care-can-now-be-proved',
+  'gestell': '05-the-filter',
+  'spiegel-spiel': 'the-five-completions',
+  'geviert': 'the-five-completions',
+  'lichtung': '06-dwelling-in-the-digital-age',
+  'being and time': 'the-handedness-of-being',
+  'beiträge': 'the-five-completions',
+  'gegenschwung': 'the-five-completions',
+  'cete': 'the-cete',
+  'poiesis': '06-dwelling-in-the-digital-age',
+  'letter on humanism': 'the-handedness-of-being',
+  'veritas, non auctoritas, facit legem.': '11-the-event-of-logic',
+  'er-eignen': 'the-handedness-of-being',
+  // Essay titles as they appear in italic
+  'the handedness of being': 'the-handedness-of-being',
+  'the five completions': 'the-five-completions',
+  'the chiral completion': 'the-chiral-completion',
+  'the filter': '05-the-filter',
+  'the proof of love': 'the-proof-of-love',
+  'the passage': 'the-passage',
+  'tuesday in the clearing': 'tuesday-in-the-clearing',
+  'the cete': 'the-cete',
+  'chirality and agamben': 'chirality-agamben',
+  'the chiral pedagogy': 'chiral-pedagogy',
+  'dwelling in the digital age': '06-dwelling-in-the-digital-age',
+  'the event of logic': '11-the-event-of-logic',
+  'the question concerning care': 'care-can-now-be-proved',
+  'theses on chirality': 'theses-on-chirality',
+  'the constellation': 'the-constellation',
+}
+
 function setupIntro(onComplete: () => void): void {
   const intro = document.getElementById('intro')!
   const sections = document.querySelectorAll('.intro-section')
@@ -103,6 +142,8 @@ function buildSidebar(nodes: PositionedNode[], renderer: MoleculeRenderer): void
   }
 }
 
+let currentRenderer: MoleculeRenderer | null = null
+
 async function openEssay(id: string): Promise<void> {
   const reader = document.getElementById('essay-reader')!
   const content = reader.querySelector('.reader-content')!
@@ -115,8 +156,53 @@ async function openEssay(id: string): Promise<void> {
   if (resp.ok) {
     content.innerHTML = await resp.text()
     content.scrollTop = 0
+    linkifyTerms(content)
   } else {
     content.innerHTML = '<p style="color: var(--text-dim);">Essay not found.</p>'
+  }
+}
+
+function linkifyTerms(container: Element): void {
+  const emElements = container.querySelectorAll('em')
+
+  for (const em of emElements) {
+    const text = em.textContent?.trim() || ''
+    const lower = text.toLowerCase().replace(/[""]/g, '"').replace(/['']/g, "'")
+
+    // Try exact match, then without trailing punctuation
+    let essayId = TERM_ESSAY_MAP[lower]
+    if (!essayId) {
+      const stripped = lower.replace(/[.,;:!?]$/, '').trim()
+      essayId = TERM_ESSAY_MAP[stripped]
+    }
+
+    if (!essayId) continue
+
+    const link = document.createElement('a')
+    link.className = 'term-link'
+    link.textContent = text
+    link.href = '#'
+    link.dataset.essayId = essayId
+
+    link.addEventListener('mouseenter', () => {
+      if (currentRenderer) {
+        currentRenderer.resetTrace(essayId)
+        currentRenderer.highlightedNodeId = essayId
+      }
+    })
+
+    link.addEventListener('mouseleave', () => {
+      if (currentRenderer) {
+        currentRenderer.highlightedNodeId = null
+      }
+    })
+
+    link.addEventListener('click', (e) => {
+      e.preventDefault()
+      openEssay(essayId)
+    })
+
+    em.replaceWith(link)
   }
 }
 
@@ -147,6 +233,7 @@ async function init(): Promise<void> {
 
   const container = document.getElementById('graph-container')!
   const renderer = new MoleculeRenderer(container)
+  currentRenderer = renderer
 
   const nodes = computeLayout(data)
   renderer.buildScene(nodes, data.edges)
