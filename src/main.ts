@@ -1,4 +1,4 @@
-import { computeLayout } from './graph/force'
+import { computeLayout, BOOK_ORDER, CRYPTO_ORDER } from './graph/force'
 import { MoleculeRenderer } from './graph/renderer'
 import type { PositionedNode } from './graph/force'
 import type { GraphData } from './data/types'
@@ -89,6 +89,16 @@ const TERM_DATA: Record<string, TermData> = {
   'the encounter': { essay: 'chirality' },
   'theses on feuerbach': { gloss: 'Marx\'s eleven theses (1845) — "Philosophers have only interpreted the world..."' },
   'remnants of auschwitz': { essay: 'chirality-agamben', gloss: 'Agamben\'s meditation on testimony, the witness, and the Muselmann' },
+  // Cryptosovereignty vocabulary
+  'cryptosovereignty': { essay: '01-cryptosovereignty', gloss: 'The sovereign power of cryptography — legitimacy grounded in mathematical truth' },
+  'veritas non auctoritas': { essay: '01-cryptosovereignty', gloss: 'Truth, not authority, makes law — the inversion of Hobbes' },
+  'leviathan': { essay: '07-the-sovereign-the-subject', gloss: 'Hobbes\' absolute sovereign — the political form Bitcoin replaces' },
+  'partisan': { essay: '16-theory-of-the-crypto-partisan', gloss: 'The irregular fighter — the crypto-partisan operates in deterritorialized digital space' },
+  'messianic': { essay: '12-messianic-bitcoin', gloss: 'Benjamin\'s weak messianic power — the redemptive force hidden in Bitcoin' },
+  'eidgenossenschaft': { essay: 'ext-the-solitary-sovereign', gloss: 'Oath-fellowship — sovereign beings swearing mutual aid without surrendering sovereignty' },
+  'sovereign mutualism': { essay: 'ext-sovereign-mutualism', gloss: 'Federation of sovereign clearings, each strengthened by every other' },
+  'the clearing': { essay: 'ext-first-philosophy', gloss: 'Heidegger\'s Lichtung — the space where truth presences, kept open by refusal to fill it' },
+  'sovereign stack': { essay: 'ext-first-philosophy', gloss: 'Value \u2192 Communication \u2192 Cognition \u2192 Peoplehood — the four clearings' },
 }
 
 function setupIntro(onComplete: () => void): void {
@@ -161,15 +171,26 @@ function setupIntro(onComplete: () => void): void {
   }
 }
 
-function buildSidebar(nodes: PositionedNode[], renderer: MoleculeRenderer): void {
+function buildSidebar(nodes: PositionedNode[], renderer: MoleculeRenderer, cluster: 'chirality' | 'cryptosovereignty' = 'chirality'): void {
   const list = document.querySelector('.sidebar-list')!
-  const ordered = [...nodes].sort((a, b) => a.bookOrder - b.bookOrder)
+  const heading = document.querySelector('.sidebar-heading')!
+  list.innerHTML = ''
 
-  for (const node of ordered) {
+  const order = cluster === 'chirality' ? BOOK_ORDER : CRYPTO_ORDER
+  heading.textContent = cluster === 'chirality' ? 'Reading Order' : 'Book Chapters'
+
+  // Filter nodes to this cluster's order and sort by position in that order
+  const orderMap = new Map(order.map((id, i) => [id, i + 1]))
+  const clusterNodes = nodes
+    .filter(n => orderMap.has(n.id))
+    .sort((a, b) => (orderMap.get(a.id) ?? 99) - (orderMap.get(b.id) ?? 99))
+
+  for (const node of clusterNodes) {
+    const num = orderMap.get(node.id) ?? 99
     const item = document.createElement('div')
     item.className = 'sidebar-item'
     item.dataset.nodeId = node.id
-    item.innerHTML = `<span class="item-num">${node.bookOrder}.</span><span class="item-title">${node.title}</span>`
+    item.innerHTML = `<span class="item-num">${num}.</span><span class="item-title">${node.title}</span>`
 
     item.addEventListener('mouseenter', () => {
       renderer.resetTrace(node.id)
@@ -285,7 +306,29 @@ function setupReader(): void {
 function showSidebar(): void {
   setTimeout(() => {
     document.getElementById('sidebar')!.classList.add('visible')
+    document.getElementById('cluster-nav')?.classList.add('visible')
   }, 2000)
+}
+
+function setupClusterNav(nodes: PositionedNode[], renderer: MoleculeRenderer): void {
+  let activeCluster: 'chirality' | 'cryptosovereignty' = 'chirality'
+  const nav = document.getElementById('cluster-nav')!
+  const labels = nav.querySelectorAll('.cluster-label')
+
+  labels.forEach(label => {
+    label.addEventListener('click', () => {
+      const cluster = (label as HTMLElement).dataset.cluster as 'chirality' | 'cryptosovereignty'
+      if (cluster === activeCluster) return
+
+      activeCluster = cluster
+      renderer.travelToCluster(cluster)
+      buildSidebar(nodes, renderer, cluster)
+
+      // Update active label
+      labels.forEach(l => l.classList.remove('active'))
+      label.classList.add('active')
+    })
+  })
 }
 
 async function init(): Promise<void> {
@@ -299,8 +342,9 @@ async function init(): Promise<void> {
 
   const nodes = computeLayout(data)
   renderer.buildScene(nodes, data.edges)
-  buildSidebar(nodes, renderer)
+  buildSidebar(nodes, renderer, 'chirality')
   setupReader()
+  setupClusterNav(nodes, renderer)
 
   // Sidebar pulse sync — update active item glow in sync with renderer
   function syncSidebarPulse(): void {

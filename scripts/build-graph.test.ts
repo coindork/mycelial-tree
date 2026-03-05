@@ -232,9 +232,10 @@ describe('discoverConnections', () => {
 // --- buildGraph ---
 
 describe('buildGraph', () => {
-  const files = [
+  const files: { filename: string; raw: string; cluster: string }[] = [
     {
       filename: 'essay-a.md',
+      cluster: 'chirality',
       raw: `---
 title: "Essay A"
 subtitle: "Subtitle A"
@@ -251,6 +252,7 @@ Content of A.
     },
     {
       filename: 'essay-b.md',
+      cluster: 'chirality',
       raw: `---
 title: "Essay B"
 concepts: [care, dwelling, clearing, Heidegger]
@@ -265,6 +267,7 @@ Content of B.
     },
     {
       filename: 'essay-c.md',
+      cluster: 'chirality',
       raw: `---
 title: "Essay C"
 concepts: [network, federation]

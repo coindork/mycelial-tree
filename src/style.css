@@ -138,6 +138,35 @@ body.graph-active {
   50% { transform: rotate(45deg) translateY(4px); }
 }
 
+/* === CLUSTER NAV === */
+
+#cluster-nav {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 16;
+  display: flex;
+  gap: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+#cluster-nav.visible {
+  opacity: 1;
+}
+.cluster-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+.cluster-label:hover,
+.cluster-label.active {
+  color: var(--orange);
+}
+
 /* === GRAPH === */
 
 #graph-container {

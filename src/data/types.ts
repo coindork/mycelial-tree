@@ -17,6 +17,7 @@ export interface GraphNode {
   layer: 'surface' | 'soil'
   hand: 'left' | 'right' | 'both'
   ghost: boolean
+  cluster: string
   connectionCount: number
   x?: number
   y?: number

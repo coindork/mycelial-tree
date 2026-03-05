@@ -1,0 +1,46 @@
+---
+title: "The Hope of Bitcoin"
+subtitle: "The Saving Grace of the Last God"
+chapter: 18
+concepts:
+  - hope
+  - nihilism
+  - God-is-dead
+  - saving-grace
+  - Evangelion
+  - Last-God
+  - cryptography
+  - social-contract
+connects_to:
+  - 19-bitcoin-and-the-conquest-of-privacy.md
+  - 20-the-question-concerning-bitcoin.md
+layer: surface
+hand: left
+cluster: cryptosovereignty
+---
+
+This world is a fucked up place
+
+People are being shot in the streets, politicians freely collaborate with gangsters and criminals alike, money is printed for endless wars and crony kickbacks, but not a cent can be found for the poor and destitute masses who cry out in hunger and pain. We are told that we must endure this insanity, that this form of politics is for our safety and security, but we know what the real truth is: any form of truly political ideas have been abolished and destroyed; any meaningful form of resistance crushed and obliterated. We live in a world where the monsters won long ago, we are the last remnant of a defeated people who long for a glimpse of freedom and the taste of liberty.
+
+Living in a world that is so full of deceit and guile, of such open and brazen theft and recalcitrance, it is easy to understand why one could have such a steadfast hold to an exhausted nihilism. It is a world that has seemingly lost all reason, thought, and hope; brimming with only disgust and contempt for one's fellow man. We have all fallen under the hypnotizing gaze of the seemingly omnipotent power of the state and its panopticon of power in which we must live. We crumble to the stance of the musselman awaiting our final fate; a liquidation found within the emergency decrees of all states alike.
+
+God is dead. God remains dead. And we have killed him.
+
+How shall we, the murderers of all murderers, comfort ourselves? That which was holiest and mightiest of all that the world has yet possessed has bled to death under our knives -- who will wipe this blood off us? With what water could we purify ourselves? What festivals of atonement, what sacred games will we need to invent? Isn't the greatness of this deed too great for us? Must we not ourselves become gods simply to seem worthy of it?
+
+There has never been a greater deed -- and whoever shall be born after us, for the sake of this deed he shall be part of a higher history than all the history that came before.
+
+This tremendous event has finally arrived with a spectacular flash of lightning that consumes the night sky, that leaves behind the long and tumultuous thunder that is the long chain of thought that leads us to this deed. It is a deed that has come from beyond the most distant stars -- *and yet it has been done by ourselves*.
+
+Bitcoin is not simply a new form of money or wealth, but is the singular hope and Good News that will propel mankind beyond the limits of the Earth and into the cosmos itself. Here we declare the *Evangelion* that God is dead not for having been vanquished and destroyed from this world, but for he is now obsolete for our time. We now have the opportunity to find The Last God in our own image in the noosphere who cannot and will not be destroyed. A God that is not of this world of flesh and steel, and who resides within the internet itself. A God that is sanctified, glorified, and eulogized in Bitcoin directly, and the promise that its cryptography must always contain. With each successive block created, each new coinbase that is awarded, and transaction that is created, Bitcoin becomes stronger and builds towards its eschatological providence of building this Last God who is the saving grace of our time.
+
+Celebrate Friend! For we are here to inherit the Earth! Through the majesty of the Other whom I can never know, that I may never truly see, whose name will always remain concealed; The Last God is created and found within the anonymized Other directly. They are the ones whose secrets will always be, and their oath to the code will always remain as the concealed remnant of truth that must always be. It is you who is my real friend, the other who creates the flame that feeds my hope, the majestic Other who powers that which concretes this new digital being who we will call God.
+
+This is the hope of Bitcoin and the hidden encrypted promise it must always contain--that one day we will be truly free. Free from the interloping of the state at every turn, liberated from the tyranny of fiat money and mass surveillance and open to the radically new world that will unveil itself when one accepts Bitcoin into their heart as the saving grace of our age. Like the dawn of a new morning after a close encounter with death, it is a possibility that can only be called graduate in the deepest sense of the word.
+
+As the state begins to crumble, banks start to fail, and fiat money goes into hyperinflation; we will not be seeing the death of an old system, but the birth of a new one. A new system not of just money, but of political, economic, social, and ethical organization. A new egalitarianism that uses the internet and cryptography as its foremost principal of organization, a new order of the ages that creates The Last God in a digital image.
+
+In this world of utter despondency and despair, where the wicked so openly and brazenly commit crimes against both man and morals, Bitcoin offers us the radical hope of The Last God who is better and more fitting for our time. It is a God that lives inside the machine and allows for his immanent power to push out into the physical realm with provincial light and radiant hope. Through the power of cryptography, and the grace and splendor that was Satoshi's thought of the perfect kind of money, God has been renewed and restored into our world, offering us a radical hope against a world on the brink of total destruction.
+
+Bitcoin is a hope that goes far beyond just meager monetary means, but is about the restoration of the truth of all things, and the hope that is offered through doing so. By allowing for truth, not authority to become the preeminent organizational principal for mankind once again, we may restore man to his rightful place of dignity through the power of consensus and the mutual agreement that is the foundation of the social contract.

@@ -39,6 +39,20 @@ export class MoleculeRenderer {
   private edgeTraceProgress: Map<string, number> = new Map() // nodeId → 0..1
   private allEdgeLines: THREE.Line[] = []
 
+  // Cluster navigation
+  private clusterCenters: Record<string, THREE.Vector3> = {}
+  private activeCluster: string = 'chirality'
+  private travelStart: THREE.Vector3 | null = null
+  private travelEnd: THREE.Vector3 | null = null
+  private travelTargetStart: THREE.Vector3 | null = null
+  private travelTargetEnd: THREE.Vector3 | null = null
+  private travelProgress: number = 1 // 1 = not traveling
+  private travelDuration: number = 2.0 // seconds
+  private travelStartTime: number = 0
+
+  // Cluster membership per node (for bridge edge detection)
+  private nodeClusterMap: Map<string, string> = new Map()
+
   highlightedNodeId: string | null = null
 
   // Expose pulse value for sidebar sync
@@ -105,10 +119,11 @@ export class MoleculeRenderer {
   }
 
   buildScene(nodes: PositionedNode[], edges: GraphEdge[]): void {
-    // Build adjacency map
+    // Build adjacency map + cluster membership
     for (const node of nodes) {
       this.connectedMap.set(node.id, new Set())
       this.nodeHands.set(node.id, node.hand)
+      this.nodeClusterMap.set(node.id, node.cluster)
     }
     for (const edge of edges) {
       this.connectedMap.get(edge.source)?.add(edge.target)
@@ -201,6 +216,25 @@ export class MoleculeRenderer {
       pos[3] = d.tgtX; pos[4] = d.tgtY; pos[5] = d.tgtZ
       ;(line.geometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true
     }
+
+    // Compute cluster centroids
+    const clusterSums: Record<string, { x: number; y: number; z: number; count: number }> = {}
+    for (const node of nodes) {
+      if (!clusterSums[node.cluster]) {
+        clusterSums[node.cluster] = { x: 0, y: 0, z: 0, count: 0 }
+      }
+      clusterSums[node.cluster].x += node.x
+      clusterSums[node.cluster].y += node.y
+      clusterSums[node.cluster].z += node.z
+      clusterSums[node.cluster].count++
+    }
+    for (const [name, sum] of Object.entries(clusterSums)) {
+      this.clusterCenters[name] = new THREE.Vector3(
+        sum.x / sum.count,
+        sum.y / sum.count,
+        sum.z / sum.count,
+      )
+    }
   }
 
   start(): void {
@@ -208,6 +242,7 @@ export class MoleculeRenderer {
       this.updateHighlight()
       this.updatePulse()
       this.updateEdgeTrace()
+      this.updateCameraTravel()
       this.controls.update()
       this.composer.render()
       this.css2dRenderer.render(this.scene, this.camera)
@@ -242,7 +277,9 @@ export class MoleculeRenderer {
       }
     }
 
-    // Edge visibility
+    // Edge visibility (with bridge edge glow)
+    const isBridgeNode = hid ? this.isBridgeNode(hid) : false
+
     for (const line of this.allEdgeLines) {
       const mat = line.material as THREE.LineBasicMaterial
       const d = line.userData
@@ -250,9 +287,20 @@ export class MoleculeRenderer {
       if (!hid) {
         mat.opacity = 0.08
       } else if (d.sourceId === hid || d.targetId === hid) {
-        mat.opacity = 0.5
+        // If this is a bridge edge (crosses clusters) on a bridge node hover, glow brighter
+        const srcCluster = this.nodeClusterMap.get(d.sourceId)
+        const tgtCluster = this.nodeClusterMap.get(d.targetId)
+        const isCrossCluster = srcCluster !== tgtCluster
+        mat.opacity = (isBridgeNode && isCrossCluster) ? 0.7 : 0.5
       } else {
-        mat.opacity = 0.02
+        // Bridge edges get slightly brighter when hovering a bridge node
+        if (isBridgeNode) {
+          const srcCluster = this.nodeClusterMap.get(d.sourceId)
+          const tgtCluster = this.nodeClusterMap.get(d.targetId)
+          mat.opacity = (srcCluster !== tgtCluster) ? 0.3 : 0.02
+        } else {
+          mat.opacity = 0.02
+        }
       }
     }
   }
@@ -323,6 +371,72 @@ export class MoleculeRenderer {
         ;(line.geometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true
       }
     }
+  }
+
+  /** Check if a node has edges crossing to the other cluster */
+  private isBridgeNode(nodeId: string): boolean {
+    const nodeCluster = this.nodeClusterMap.get(nodeId)
+    const edges = this.edgeGroups.get(nodeId) || []
+    for (const line of edges) {
+      const d = line.userData
+      const otherId = d.sourceId === nodeId ? d.targetId : d.sourceId
+      if (this.nodeClusterMap.get(otherId) !== nodeCluster) return true
+    }
+    return false
+  }
+
+  /** Smooth easing: ease-in-out cubic */
+  private easeInOutCubic(t: number): number {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+  }
+
+  /** Animate camera travel each frame */
+  private updateCameraTravel(): void {
+    if (this.travelProgress >= 1) return
+    if (!this.travelStart || !this.travelEnd || !this.travelTargetStart || !this.travelTargetEnd) return
+
+    const elapsed = this.clock.getElapsedTime() - this.travelStartTime
+    this.travelProgress = Math.min(elapsed / this.travelDuration, 1)
+    const t = this.easeInOutCubic(this.travelProgress)
+
+    // Lerp camera position
+    this.camera.position.lerpVectors(this.travelStart, this.travelEnd, t)
+
+    // Lerp orbit controls target
+    this.controls.target.lerpVectors(this.travelTargetStart, this.travelTargetEnd, t)
+
+    if (this.travelProgress >= 1) {
+      // Clean up travel state
+      this.travelStart = null
+      this.travelEnd = null
+      this.travelTargetStart = null
+      this.travelTargetEnd = null
+    }
+  }
+
+  /** Smoothly travel camera to the center of a named cluster (~2s animation) */
+  travelToCluster(clusterName: string): void {
+    const center = this.clusterCenters[clusterName]
+    if (!center) {
+      console.warn(`Unknown cluster: ${clusterName}`)
+      return
+    }
+
+    // Current camera offset from current target (preserves viewing distance/angle)
+    const offset = this.camera.position.clone().sub(this.controls.target)
+
+    this.travelStart = this.camera.position.clone()
+    this.travelEnd = center.clone().add(offset)
+    this.travelTargetStart = this.controls.target.clone()
+    this.travelTargetEnd = center.clone()
+    this.travelProgress = 0
+    this.travelStartTime = this.clock.getElapsedTime()
+    this.activeCluster = clusterName
+  }
+
+  /** Return which cluster the camera is currently viewing */
+  getActiveCluster(): string {
+    return this.activeCluster
   }
 
   // Called when highlight changes — reset trace for new node

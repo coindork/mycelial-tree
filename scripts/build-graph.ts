@@ -74,13 +74,13 @@ export function discoverConnections(
 }
 
 export function buildGraph(
-  files: { filename: string; raw: string }[]
+  files: { filename: string; raw: string; cluster: string }[]
 ): { graph: GraphData; essays: { id: string; html: string }[] } {
   // Parse all files
   const parsed = files.map((f) => {
     const id = f.filename.replace(/\.md$/, '')
     const { frontmatter, body } = parseFrontmatter(f.filename, f.raw)
-    return { id, frontmatter, body }
+    return { id, frontmatter, body, cluster: f.cluster }
   })
 
   // Discover edges
@@ -105,6 +105,7 @@ export function buildGraph(
     layer: p.frontmatter.layer,
     hand: p.frontmatter.hand,
     ghost: p.frontmatter.ghost ?? false,
+    cluster: p.cluster,
     connectionCount: counts.get(p.id) ?? 0,
   }))
 
@@ -125,20 +126,36 @@ const isMain =
     process.argv[1].endsWith('build-graph'))
 
 if (isMain) {
-  const essaysDir = path.resolve(__dirname, '..', 'content', 'essays')
+  const contentDir = path.resolve(__dirname, '..', 'content')
   const publicDir = path.resolve(__dirname, '..', 'public')
   const essaysOutDir = path.join(publicDir, 'essays')
+
+  // Content directories and their cluster names
+  const contentSources: { dir: string; cluster: string }[] = [
+    { dir: path.join(contentDir, 'essays'), cluster: 'chirality' },
+    { dir: path.join(contentDir, 'cryptosovereignty'), cluster: 'cryptosovereignty' },
+  ]
 
   // Ensure output dirs exist
   fs.mkdirSync(publicDir, { recursive: true })
   fs.mkdirSync(essaysOutDir, { recursive: true })
 
-  // Read all .md files
-  const filenames = fs.readdirSync(essaysDir).filter((f) => f.endsWith('.md'))
-  const files = filenames.map((filename) => ({
-    filename,
-    raw: fs.readFileSync(path.join(essaysDir, filename), 'utf-8'),
-  }))
+  // Read .md files from all content directories
+  const files: { filename: string; raw: string; cluster: string }[] = []
+  for (const source of contentSources) {
+    if (!fs.existsSync(source.dir)) {
+      console.warn(`Content directory not found, skipping: ${source.dir}`)
+      continue
+    }
+    const filenames = fs.readdirSync(source.dir).filter((f) => f.endsWith('.md'))
+    for (const filename of filenames) {
+      files.push({
+        filename,
+        raw: fs.readFileSync(path.join(source.dir, filename), 'utf-8'),
+        cluster: source.cluster,
+      })
+    }
+  }
 
   const { graph, essays } = buildGraph(files)
 
