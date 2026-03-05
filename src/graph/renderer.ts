@@ -9,6 +9,17 @@ import type { GraphEdge } from '../data/types'
 
 const FEATURED_NODE_ID = 'the-handedness-of-being'
 
+// Hand → color mapping
+const HAND_COLORS: Record<string, number> = {
+  left: 0xF7931A,   // amber
+  right: 0x4A9EF7,  // cool blue
+  both: 0xD4A853,   // warm gold (split)
+}
+
+function handColor(hand: string): number {
+  return HAND_COLORS[hand] || HAND_COLORS.left
+}
+
 export class MoleculeRenderer {
   private scene: THREE.Scene
   private camera: THREE.PerspectiveCamera
@@ -18,11 +29,20 @@ export class MoleculeRenderer {
   private controls: OrbitControls
   private clock: THREE.Clock
 
-  private nodeMaterials: Map<string, THREE.MeshStandardMaterial> = new Map()
-  private edgeMaterial: THREE.LineBasicMaterial | null = null
+  // Text labels ARE the nodes — no spheres
+  private labelElements: Map<string, HTMLDivElement> = new Map()
+  private nodeHands: Map<string, string> = new Map()
   private connectedMap: Map<string, Set<string>> = new Map()
 
+  // Edge tracing
+  private edgeGroups: Map<string, THREE.Line[]> = new Map() // nodeId → its edges
+  private edgeTraceProgress: Map<string, number> = new Map() // nodeId → 0..1
+  private allEdgeLines: THREE.Line[] = []
+
   highlightedNodeId: string | null = null
+
+  // Expose pulse value for sidebar sync
+  currentPulse: number = 0
 
   private animationId: number | null = null
 
@@ -53,7 +73,7 @@ export class MoleculeRenderer {
 
     const renderPass = new RenderPass(this.scene, this.camera)
     const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(w, h), 1.5, 0.4, 0.85
+      new THREE.Vector2(w, h), 1.2, 0.5, 0.8
     )
     this.composer = new EffectComposer(this.webglRenderer)
     this.composer.addPass(renderPass)
@@ -67,10 +87,7 @@ export class MoleculeRenderer {
     this.controls.enableZoom = false
     this.controls.enablePan = false
 
-    this.scene.add(new THREE.AmbientLight(0x404040, 0.5))
-    const point = new THREE.PointLight(0xF7931A, 0.3, 500)
-    point.position.set(0, 0, 0)
-    this.scene.add(point)
+    this.scene.add(new THREE.AmbientLight(0x404040, 0.3))
 
     this.clock = new THREE.Clock()
     window.addEventListener('resize', () => this.resize())
@@ -91,61 +108,106 @@ export class MoleculeRenderer {
     // Build adjacency map
     for (const node of nodes) {
       this.connectedMap.set(node.id, new Set())
+      this.nodeHands.set(node.id, node.hand)
     }
     for (const edge of edges) {
       this.connectedMap.get(edge.source)?.add(edge.target)
       this.connectedMap.get(edge.target)?.add(edge.source)
     }
 
-    // Spheres
+    // Text nodes — CSS2D labels as the primary visual
     for (const node of nodes) {
       const isFeatured = node.id === FEATURED_NODE_ID
-      const geometry = new THREE.SphereGeometry(node.radius, 32, 32)
-      const material = new THREE.MeshStandardMaterial({
-        color: 0xF7931A,
-        emissive: 0xF7931A,
-        emissiveIntensity: isFeatured ? 0.9 : 0.5,
+      const color = handColor(node.hand)
+      const colorHex = '#' + color.toString(16).padStart(6, '0')
+
+      // Small emissive dot at the position (for bloom to pick up)
+      const dotGeo = new THREE.SphereGeometry(isFeatured ? 3 : 1.5, 16, 16)
+      const dotMat = new THREE.MeshStandardMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: isFeatured ? 1.0 : 0.6,
         roughness: 0.3,
         metalness: 0.1,
       })
-      const mesh = new THREE.Mesh(geometry, material)
-      mesh.position.set(node.x, node.y, node.z)
-      this.scene.add(mesh)
-      this.nodeMaterials.set(node.id, material)
+      const dot = new THREE.Mesh(dotGeo, dotMat)
+      dot.position.set(node.x, node.y, node.z)
+      this.scene.add(dot)
 
-      // Label
+      // Text label — scaled by connectionCount
       const div = document.createElement('div')
-      div.className = 'node-label'
+      div.className = 'node-text'
       div.textContent = node.title
-      div.style.opacity = isFeatured ? '0.85' : '0.35'
-      div.style.fontSize = isFeatured ? '12px' : '9px'
+      div.dataset.nodeId = node.id
+
+      const fontSize = isFeatured
+        ? 18
+        : Math.max(9, 7 + node.connectionCount * 1.2)
+      div.style.fontSize = `${fontSize}px`
+      div.style.color = colorHex
+      div.style.opacity = isFeatured ? '0.9' : '0.45'
+      div.style.fontWeight = isFeatured ? '500' : '300'
+
       const label = new CSS2DObject(div)
-      label.position.set(0, node.radius + 3, 0)
-      mesh.add(label)
+      label.position.set(node.x, node.y, node.z)
+      this.scene.add(label)
+
+      this.labelElements.set(node.id, div)
     }
 
-    // Edge lines
-    const positions = new Float32Array(edges.length * 6)
-    for (let i = 0; i < edges.length; i++) {
-      const src = nodes.find(n => n.id === edges[i].source)
-      const tgt = nodes.find(n => n.id === edges[i].target)
+    // Edges — one Line per edge for individual trace animation
+    for (const edge of edges) {
+      const src = nodes.find(n => n.id === edge.source)
+      const tgt = nodes.find(n => n.id === edge.target)
       if (!src || !tgt) continue
-      const o = i * 6
-      positions[o] = src.x; positions[o+1] = src.y; positions[o+2] = src.z
-      positions[o+3] = tgt.x; positions[o+4] = tgt.y; positions[o+5] = tgt.z
+
+      // Determine edge color from source hand
+      const edgeColor = handColor(src.hand)
+
+      const geo = new THREE.BufferGeometry()
+      const positions = new Float32Array(6)
+      positions[0] = src.x; positions[1] = src.y; positions[2] = src.z
+      // Start with target = source (line length 0, will animate)
+      positions[3] = src.x; positions[4] = src.y; positions[5] = src.z
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+      const mat = new THREE.LineBasicMaterial({
+        color: edgeColor,
+        transparent: true,
+        opacity: 0.08,
+      })
+      const line = new THREE.Line(geo, mat)
+      // Store full target position as userData
+      line.userData = {
+        srcX: src.x, srcY: src.y, srcZ: src.z,
+        tgtX: tgt.x, tgtY: tgt.y, tgtZ: tgt.z,
+        sourceId: edge.source,
+        targetId: edge.target,
+      }
+      this.scene.add(line)
+      this.allEdgeLines.push(line)
+
+      // Map edges to both nodes
+      if (!this.edgeGroups.has(edge.source)) this.edgeGroups.set(edge.source, [])
+      if (!this.edgeGroups.has(edge.target)) this.edgeGroups.set(edge.target, [])
+      this.edgeGroups.get(edge.source)!.push(line)
+      this.edgeGroups.get(edge.target)!.push(line)
     }
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    this.edgeMaterial = new THREE.LineBasicMaterial({
-      color: 0xF7931A, transparent: true, opacity: 0.12,
-    })
-    this.scene.add(new THREE.LineSegments(geo, this.edgeMaterial))
+
+    // Set all edges to fully drawn by default
+    for (const line of this.allEdgeLines) {
+      const d = line.userData
+      const pos = (line.geometry.getAttribute('position') as THREE.BufferAttribute).array as Float32Array
+      pos[3] = d.tgtX; pos[4] = d.tgtY; pos[5] = d.tgtZ
+      ;(line.geometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true
+    }
   }
 
   start(): void {
     const loop = () => {
       this.updateHighlight()
       this.updatePulse()
+      this.updateEdgeTrace()
       this.controls.update()
       this.composer.render()
       this.css2dRenderer.render(this.scene, this.camera)
@@ -156,38 +218,134 @@ export class MoleculeRenderer {
 
   private updateHighlight(): void {
     const hid = this.highlightedNodeId
-    if (!hid) return // pulse handles default state
-    const connected = this.connectedMap.get(hid)
+    const connected = hid ? this.connectedMap.get(hid) : null
 
-    for (const [id, material] of this.nodeMaterials) {
-      if (id === hid) {
-        material.emissiveIntensity = 0.95
+    for (const [id, div] of this.labelElements) {
+      const isFeatured = id === FEATURED_NODE_ID
+
+      if (!hid) {
+        // Default state
+        div.style.opacity = isFeatured ? '0.9' : '0.45'
+        div.classList.remove('highlighted', 'connected', 'dimmed')
+      } else if (id === hid) {
+        div.style.opacity = '1'
+        div.classList.add('highlighted')
+        div.classList.remove('connected', 'dimmed')
       } else if (connected?.has(id)) {
-        material.emissiveIntensity = 0.5
+        div.style.opacity = '0.7'
+        div.classList.add('connected')
+        div.classList.remove('highlighted', 'dimmed')
       } else {
-        material.emissiveIntensity = 0.06
+        div.style.opacity = '0.06'
+        div.classList.add('dimmed')
+        div.classList.remove('highlighted', 'connected')
       }
     }
 
-    if (this.edgeMaterial) {
-      this.edgeMaterial.opacity = 0.04
+    // Edge visibility
+    for (const line of this.allEdgeLines) {
+      const mat = line.material as THREE.LineBasicMaterial
+      const d = line.userData
+
+      if (!hid) {
+        mat.opacity = 0.08
+      } else if (d.sourceId === hid || d.targetId === hid) {
+        mat.opacity = 0.5
+      } else {
+        mat.opacity = 0.02
+      }
     }
   }
 
   private updatePulse(): void {
-    if (this.highlightedNodeId) return
     const time = this.clock.getElapsedTime()
+    this.currentPulse = 0.5 + 0.5 * Math.sin(time * 1.5)
 
-    // Restore default edge opacity
-    if (this.edgeMaterial) {
-      this.edgeMaterial.opacity = 0.12
+    if (this.highlightedNodeId) return
+
+    // "Both" hand nodes flicker between amber and blue
+    for (const [id, div] of this.labelElements) {
+      const hand = this.nodeHands.get(id) || 'left'
+      if (hand === 'both') {
+        const t = 0.5 + 0.5 * Math.sin(time * 0.8 + id.length)
+        // Interpolate between amber and blue
+        const r = Math.round(247 * (1 - t * 0.3) + 74 * t * 0.3)
+        const g = Math.round(147 * (1 - t * 0.3) + 158 * t * 0.3)
+        const b = Math.round(26 * (1 - t * 0.3) + 247 * t * 0.3)
+        div.style.color = `rgb(${r}, ${g}, ${b})`
+      }
+    }
+  }
+
+  private updateEdgeTrace(): void {
+    const hid = this.highlightedNodeId
+
+    if (!hid) {
+      // Reset all edges to fully drawn
+      for (const [nodeId, progress] of this.edgeTraceProgress) {
+        if (progress < 1) {
+          this.edgeTraceProgress.set(nodeId, Math.min(progress + 0.05, 1))
+        }
+      }
+      return
     }
 
-    for (const [id, material] of this.nodeMaterials) {
-      const isFeatured = id === FEATURED_NODE_ID
-      const base = isFeatured ? 0.9 : 0.5
-      const pulse = 0.12 * Math.sin(time * 1.5 + id.length * 0.7)
-      material.emissiveIntensity = base + pulse
+    // Get or init trace progress for highlighted node
+    const current = this.edgeTraceProgress.get(hid) ?? 0
+    if (current < 1) {
+      this.edgeTraceProgress.set(hid, Math.min(current + 0.04, 1)) // ~400ms to trace
+
+      const progress = this.edgeTraceProgress.get(hid)!
+      const nodeEdges = this.edgeGroups.get(hid) || []
+
+      for (const line of nodeEdges) {
+        const d = line.userData
+        if (d.sourceId !== hid && d.targetId !== hid) continue
+
+        const pos = (line.geometry.getAttribute('position') as THREE.BufferAttribute).array as Float32Array
+
+        // Determine which end is the highlighted node
+        const isSource = d.sourceId === hid
+        const fromX = isSource ? d.srcX : d.tgtX
+        const fromY = isSource ? d.srcY : d.tgtY
+        const fromZ = isSource ? d.srcZ : d.tgtZ
+        const toX = isSource ? d.tgtX : d.srcX
+        const toY = isSource ? d.tgtY : d.srcY
+        const toZ = isSource ? d.tgtZ : d.srcZ
+
+        // Set start point
+        pos[0] = fromX; pos[1] = fromY; pos[2] = fromZ
+        // Lerp end point
+        pos[3] = fromX + (toX - fromX) * progress
+        pos[4] = fromY + (toY - fromY) * progress
+        pos[5] = fromZ + (toZ - fromZ) * progress
+
+        ;(line.geometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true
+      }
+    }
+  }
+
+  // Called when highlight changes — reset trace for new node
+  resetTrace(nodeId: string | null): void {
+    if (nodeId) {
+      this.edgeTraceProgress.set(nodeId, 0)
+
+      // Reset the edge geometry for this node's edges
+      const nodeEdges = this.edgeGroups.get(nodeId) || []
+      for (const line of nodeEdges) {
+        const d = line.userData
+        if (d.sourceId !== nodeId && d.targetId !== nodeId) continue
+
+        const pos = (line.geometry.getAttribute('position') as THREE.BufferAttribute).array as Float32Array
+        const isSource = d.sourceId === nodeId
+        const fromX = isSource ? d.srcX : d.tgtX
+        const fromY = isSource ? d.srcY : d.tgtY
+        const fromZ = isSource ? d.srcZ : d.tgtZ
+
+        pos[0] = fromX; pos[1] = fromY; pos[2] = fromZ
+        pos[3] = fromX; pos[4] = fromY; pos[5] = fromZ
+        ;(line.geometry.getAttribute('position') as THREE.BufferAttribute).needsUpdate = true
+      }
     }
   }
 }

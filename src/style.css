@@ -149,12 +149,26 @@ body.graph-active {
   overflow: hidden;
 }
 
-.node-label {
-  color: rgba(224, 224, 224, 0.4);
+/* Text IS the node */
+.node-text {
   font-family: system-ui, -apple-system, sans-serif;
   white-space: nowrap;
   user-select: none;
   pointer-events: none;
+  transition: opacity 0.3s ease;
+  text-shadow: 0 0 8px currentColor;
+}
+
+.node-text.highlighted {
+  text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
+}
+
+.node-text.connected {
+  text-shadow: 0 0 12px currentColor;
+}
+
+.node-text.dimmed {
+  text-shadow: none;
 }
 
 /* === SIDEBAR === */

@@ -84,6 +84,7 @@ function buildSidebar(nodes: PositionedNode[], renderer: MoleculeRenderer): void
     item.innerHTML = `<span class="item-num">${node.bookOrder}.</span><span class="item-title">${node.title}</span>`
 
     item.addEventListener('mouseenter', () => {
+      renderer.resetTrace(node.id)
       renderer.highlightedNodeId = node.id
       list.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'))
       item.classList.add('active')
@@ -115,6 +116,17 @@ async function init(): Promise<void> {
   const nodes = computeLayout(data)
   renderer.buildScene(nodes, data.edges)
   buildSidebar(nodes, renderer)
+
+  // Sidebar pulse sync — update active item glow in sync with renderer
+  function syncSidebarPulse(): void {
+    const activeItem = document.querySelector('.sidebar-item.active .item-num') as HTMLElement | null
+    if (activeItem) {
+      const p = renderer.currentPulse
+      activeItem.style.textShadow = `0 0 ${4 + p * 8}px var(--orange)`
+    }
+    requestAnimationFrame(syncSidebarPulse)
+  }
+  requestAnimationFrame(syncSidebarPulse)
 
   setupIntro(() => {
     renderer.start()
