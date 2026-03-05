@@ -5,6 +5,84 @@ import type { GraphData } from './data/types'
 import type { SimulationNode, SimulationEdge } from './graph/force'
 import type { ForceLink, ForceCenter } from 'd3-force'
 
+// --- Intro scroll handling ---
+function setupIntro(onComplete: () => void): void {
+  const intro = document.getElementById('intro')!
+  const sections = document.querySelectorAll('.intro-section')
+  const scrollHint = document.querySelector('.intro-scroll-hint')
+  const graphContainer = document.getElementById('graph-container')!
+
+  // Initially hide graph
+  graphContainer.style.opacity = '0'
+  graphContainer.style.transition = 'opacity 1.5s ease'
+
+  // Intersection observer for scroll-triggered text reveals
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible')
+        }
+      })
+    },
+    { threshold: 0.3 }
+  )
+
+  sections.forEach((section) => observer.observe(section))
+
+  // Watch scroll position for transition
+  let transitioned = false
+
+  function checkScroll(): void {
+    if (transitioned) return
+
+    const scrollProgress = window.scrollY / (intro.scrollHeight - window.innerHeight)
+
+    // Hide scroll hint after first scroll
+    if (window.scrollY > 100 && scrollHint) {
+      scrollHint.classList.add('hidden')
+    }
+
+    // Show graph faintly as you scroll deeper
+    if (scrollProgress > 0.3) {
+      graphContainer.style.opacity = String(Math.min((scrollProgress - 0.3) * 2, 0.4))
+    }
+
+    // Full transition when near bottom
+    if (scrollProgress > 0.85) {
+      transitioned = true
+      observer.disconnect()
+
+      // Fade out intro
+      intro.style.transition = 'opacity 1s ease'
+      intro.style.opacity = '0'
+      intro.style.pointerEvents = 'none'
+
+      // Reveal graph fully
+      graphContainer.style.opacity = '1'
+
+      // Lock scroll
+      setTimeout(() => {
+        document.body.classList.add('graph-active')
+        intro.style.display = 'none'
+        window.scrollTo(0, 0)
+        onComplete()
+      }, 1000)
+    }
+  }
+
+  window.addEventListener('scroll', checkScroll, { passive: true })
+
+  // Skip intro if hash is present (direct link to essay)
+  if (window.location.hash.length > 1) {
+    transitioned = true
+    intro.style.display = 'none'
+    graphContainer.style.opacity = '1'
+    document.body.classList.add('graph-active')
+    onComplete()
+  }
+}
+
 async function init(): Promise<void> {
   // Fetch graph data
   const base = import.meta.env.BASE_URL
@@ -41,6 +119,16 @@ async function init(): Promise<void> {
 
   // Canvas element for interactions
   const canvas = renderer.element as HTMLCanvasElement
+
+  // --- Intro ---
+  setupIntro(() => {
+    // Re-center simulation after intro completes (viewport may have changed)
+    const centerForce = simulation.force('center') as ForceCenter<SimulationNode>
+    if (centerForce) {
+      centerForce.x(renderer.width / 2).y(renderer.height / 2)
+    }
+    simulation.alpha(0.5).restart()
+  })
 
   // --- Hover ---
   canvas.addEventListener('mousemove', (e: MouseEvent) => {
@@ -103,7 +191,7 @@ async function init(): Promise<void> {
   })
 
   // --- Click ---
-  canvas.addEventListener('click', (e: MouseEvent) => {
+  canvas.addEventListener('click', () => {
     if (hoveredNode) {
       openNode(hoveredNode)
     } else if (pane.isOpen) {
