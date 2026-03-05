@@ -156,8 +156,8 @@ async function init(): Promise<void> {
   })
 
   // --- Clamp transform to keep graph visible ---
-  const MIN_ZOOM = 0.3
-  const MAX_ZOOM = 3.0
+  const MIN_ZOOM = 0.6
+  const MAX_ZOOM = 2.5
 
   function clampTransform(): void {
     // Clamp zoom
@@ -203,7 +203,7 @@ async function init(): Promise<void> {
     const mouseX = e.clientX - rect.left
     const mouseY = e.clientY - rect.top
 
-    const factor = e.deltaY < 0 ? 1.05 : 0.95
+    const factor = e.deltaY < 0 ? 1.02 : 0.98
     const newK = transform.k * factor
 
     // Zoom toward mouse position
