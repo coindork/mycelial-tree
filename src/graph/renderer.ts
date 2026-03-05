@@ -7,7 +7,7 @@ import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer
 import type { PositionedNode } from './force'
 import type { GraphEdge } from '../data/types'
 
-const FEATURED_NODE_ID = 'the-handedness-of-being'
+const FEATURED_NODE_ID = 'the-constellation'
 
 // Hand → color mapping
 const HAND_COLORS: Record<string, number> = {

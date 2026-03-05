@@ -1,9 +1,10 @@
 import * as d3 from 'd3'
 import type { GraphData, GraphNode, GraphEdge } from '../data/types'
 
-const FEATURED_NODE_ID = 'the-handedness-of-being'
+const FEATURED_NODE_ID = 'the-constellation'
 
 export const BOOK_ORDER: string[] = [
+  'the-constellation',
   'the-handedness-of-being',
   'theses-on-chirality',
   'the-five-completions',
