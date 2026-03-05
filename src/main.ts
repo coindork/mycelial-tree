@@ -309,25 +309,42 @@ function showSidebar(): void {
   }, 2000)
 }
 
-function setupClusterNav(nodes: PositionedNode[], renderer: MoleculeRenderer): void {
+function setupClusterNav(nodes: PositionedNode[], renderer: MoleculeRenderer, data: GraphData): void {
   let activeMode: 'chirality' | 'atlas' = 'chirality'
   const nav = document.getElementById('cluster-nav')!
   const labels = nav.querySelectorAll('.cluster-label[data-cluster]')
 
   labels.forEach(label => {
-    label.addEventListener('click', () => {
+    label.addEventListener('click', async () => {
       const mode = (label as HTMLElement).dataset.cluster as 'chirality' | 'atlas'
       if (mode === activeMode) return
 
       activeMode = mode
 
       if (mode === 'chirality') {
+        // Rebuild single constellation scene
+        const singleNodes = computeLayout(data, [CHIRALITY_CONFIG])
+        renderer.clearScene()
+        renderer.buildScene(singleNodes, data.edges)
         renderer.travelToCluster('chirality')
-        buildSidebar(nodes, renderer)
+        buildSidebar(singleNodes, renderer)
       } else if (mode === 'atlas') {
-        // Atlas mode rendering will be wired in Tasks 11-14
-        renderer.travelToCluster('chirality') // placeholder
-        console.log('Atlas mode not yet implemented')
+        const remoteData = await fetchRemoteGraph(GHOST_CONFIG.remoteGraphUrl)
+        if (!remoteData) {
+          console.warn('Could not load remote graph for atlas mode')
+          return
+        }
+        const merged = mergeForAtlas(data, remoteData)
+        const atlasConfigs = [
+          { ...CHIRALITY_CONFIG, clusterCenter: { x: 200, y: 0 } },
+          { ...CRYPTO_REMOTE_CONFIG, clusterCenter: { x: -200, y: 0 } },
+        ]
+        const atlasNodes = computeLayout(merged, atlasConfigs)
+        renderer.clearScene()
+        renderer.buildAtlasScene(atlasNodes, merged.edges, atlasConfigs)
+        renderer.pullBackCamera()
+        // Update sidebar to show chirality reading order in atlas view
+        buildSidebar(atlasNodes, renderer)
       }
 
       // Update active label
@@ -350,16 +367,21 @@ async function init(): Promise<void> {
   renderer.buildScene(nodes, data.edges)
   buildSidebar(nodes, renderer)
   setupReader()
-  setupClusterNav(nodes, renderer)
+  setupClusterNav(nodes, renderer, data)
 
   // Fetch ghost nodes from the remote constellation (non-blocking)
   fetchRemoteGraph(GHOST_CONFIG.remoteGraphUrl).then(remoteData => {
     if (!remoteData) return
     const { ghostNodes, ghostEdges } = identifyGhosts(data, remoteData, GHOST_CONFIG)
     if (ghostNodes.length === 0) return
-    // Ghost nodes will be rendered once the renderer supports addGhostNodes
-    // For now, store them for later use
-    console.log(`Found ${ghostNodes.length} ghost nodes from cryptosovereignty`)
+    // Position ghost nodes: run layout with both sets, extract ghost positions
+    const allNodes = [...data.nodes, ...ghostNodes]
+    const allEdges = [...data.edges, ...ghostEdges]
+    const allPositioned = computeLayout({ nodes: allNodes, edges: allEdges }, [CHIRALITY_CONFIG])
+    const ghostPositioned = allPositioned.filter(n => ghostNodes.some(g => g.id === n.id))
+    // Push ghosts back in z
+    for (const g of ghostPositioned) g.z -= 40
+    renderer.addGhostNodes(ghostPositioned, ghostEdges, GHOST_CONFIG.remoteColor, 0xD4A853, GHOST_CONFIG.remoteSiteUrl)
   })
 
   // Sidebar pulse sync — update active item glow in sync with renderer
@@ -379,8 +401,11 @@ async function init(): Promise<void> {
   })
 
   if (window.location.hash.length > 1) {
+    const essayId = window.location.hash.slice(1)
     renderer.start()
     showSidebar()
+    renderer.highlightedNodeId = essayId
+    openEssay(essayId)
   }
 }
 
