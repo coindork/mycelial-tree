@@ -3,52 +3,92 @@ import { MoleculeRenderer } from './graph/renderer'
 import type { PositionedNode } from './graph/force'
 import type { GraphData } from './data/types'
 
-// Map italic/orange terms in essays to the essay they reference
-const TERM_ESSAY_MAP: Record<string, string> = {
-  // Philosophical terms → primary essay
-  'chirality': 'chirality',
-  'ereignis': 'the-handedness-of-being',
-  'mitsein': 'the-handedness-of-being',
-  'dasein': 'the-handedness-of-being',
-  'das man': 'the-handedness-of-being',
-  'sorge': 'care-can-now-be-proved',
-  'gestell': '05-the-filter',
-  'spiegel-spiel': 'the-five-completions',
-  'geviert': 'the-five-completions',
-  'lichtung': '06-dwelling-in-the-digital-age',
-  'being and time': 'the-handedness-of-being',
-  'beiträge': 'the-five-completions',
-  'gegenschwung': 'the-five-completions',
-  'cete': 'the-cete',
-  'poiesis': '06-dwelling-in-the-digital-age',
-  'letter on humanism': 'the-handedness-of-being',
-  'veritas, non auctoritas, facit legem.': '11-the-event-of-logic',
-  'er-eignen': 'the-handedness-of-being',
-  // Essay titles (old and new names)
-  'the handedness of being': 'the-handedness-of-being',
-  'the five completions': 'the-five-completions',
-  'the beiträge completed': 'the-five-completions',
-  'the chiral completion': 'the-chiral-completion',
-  'the mycorrhizal turn': 'the-chiral-completion',
-  'the filter': '05-the-filter',
-  'the question concerning the filter': '05-the-filter',
-  'the proof of love': 'the-proof-of-love',
-  'the passage': 'the-passage',
-  'der übergang': 'the-passage',
-  'tuesday in the clearing': 'tuesday-in-the-clearing',
-  'the cete': 'the-cete',
-  'mitsein at last': 'the-cete',
-  'chirality and agamben': 'chirality-agamben',
-  'the sovereign hand': 'chirality-agamben',
-  'the chiral pedagogy': 'chiral-pedagogy',
-  'dwelling with the other hand': 'chiral-pedagogy',
-  'dwelling in the digital age': '06-dwelling-in-the-digital-age',
-  'building dwelling thinking again': '06-dwelling-in-the-digital-age',
-  'the event of logic': '11-the-event-of-logic',
-  'the question concerning care': 'care-can-now-be-proved',
-  'theses on chirality': 'theses-on-chirality',
-  'the constellation': 'the-constellation',
-  'the encounter': 'chirality',
+// Philosophical terms: essay link + glossary definition
+interface TermData { essay?: string; gloss?: string }
+const TERM_DATA: Record<string, TermData> = {
+  // Core Heideggerian vocabulary
+  'chirality': { essay: 'chirality', gloss: 'Handedness — the property of an object that cannot be superimposed on its mirror image' },
+  'ereignis': { essay: 'the-handedness-of-being', gloss: 'The Event of Appropriation — the happening through which Being and beings are brought into their own' },
+  'mitsein': { essay: 'the-handedness-of-being', gloss: 'Being-with — Heidegger\'s term for the structure of encountering others' },
+  'dasein': { essay: 'the-handedness-of-being', gloss: 'Being-there — the human being as the entity that questions its own Being' },
+  'da-sein': { essay: 'the-handedness-of-being', gloss: 'Being-there — the human being as the entity that questions its own Being' },
+  'das man': { essay: 'the-handedness-of-being', gloss: 'The They — the anonymous social mass that levels every distinction' },
+  'sorge': { essay: 'care-can-now-be-proved', gloss: 'Care — the ontological ground of human existence in Heidegger' },
+  'gestell': { essay: '05-the-filter', gloss: 'Enframing — the essence of modern technology that reduces everything to standing-reserve' },
+  'spiegel-spiel': { essay: 'the-five-completions', gloss: 'Mirror-play — the dynamic interplay of the fourfold' },
+  'geviert': { essay: 'the-five-completions', gloss: 'The Fourfold — earth, sky, divinities, mortals gathered in the thing' },
+  'the fourfold': { essay: 'the-five-completions', gloss: 'Earth, sky, divinities, mortals — the four gathered in every genuine thing' },
+  'lichtung': { essay: '06-dwelling-in-the-digital-age', gloss: 'The Clearing — the open space where beings can appear and truth can happen' },
+  'being and time': { essay: 'the-handedness-of-being', gloss: 'Heidegger\'s 1927 masterwork on the meaning of Being through temporality' },
+  'sein und zeit': { essay: 'the-handedness-of-being', gloss: 'Being and Time — Heidegger\'s 1927 masterwork' },
+  'beiträge': { essay: 'the-five-completions', gloss: 'Contributions to Philosophy — Heidegger\'s secret second masterwork (1936-38)' },
+  'beiträge zur philosophie': { essay: 'the-five-completions', gloss: 'Contributions to Philosophy (Of the Event) — Heidegger\'s secret second masterwork' },
+  'beiträge zur philosophie (vom ereignis)': { essay: 'the-five-completions', gloss: 'Contributions to Philosophy (Of the Event)' },
+  'contributions to philosophy': { essay: 'the-five-completions', gloss: 'Heidegger\'s secret second masterwork, written 1936-38' },
+  'gegenschwung': { essay: 'the-five-completions', gloss: 'Counter-resonance — the reciprocal swing between Being\'s call and Da-sein\'s response' },
+  'cete': { essay: 'the-cete', gloss: 'A gathering of badgers — here, a federation of sovereign nodes' },
+  'poiesis': { essay: '06-dwelling-in-the-digital-age', gloss: 'Bringing-forth — the mode of revealing that lets things come into presence, opposite of Gestell' },
+  'letter on humanism': { essay: 'the-handedness-of-being', gloss: 'Heidegger\'s 1947 response to Sartre, redefining humanism through Being' },
+  'er-eignen': { essay: 'the-handedness-of-being', gloss: 'To bring into one\'s own — the root verb of Ereignis' },
+  'kehre': { essay: 'the-chiral-completion', gloss: 'The Turn — Heidegger\'s shift from Dasein-centered to Being-centered thinking' },
+  'aletheia': { essay: '06-dwelling-in-the-digital-age', gloss: 'Un-concealment — truth as the process of bringing into the open' },
+  'a-letheia': { essay: '06-dwelling-in-the-digital-age', gloss: 'Un-concealment — truth as emerging from hiddenness' },
+  'angst': { essay: 'the-handedness-of-being', gloss: 'Anxiety — the fundamental mood that reveals Dasein\'s being-toward-death' },
+  'gelassenheit': { essay: '06-dwelling-in-the-digital-age', gloss: 'Releasement — letting-be, an openness to the mystery of Being' },
+  'wink': { essay: 'the-five-completions', gloss: 'The hint or beckoning of the Last God — a signal, not a revelation' },
+  'der vorbeigang': { essay: 'the-five-completions', gloss: 'The passing-by — how the Last God passes without arriving' },
+  'der letzte gott': { essay: 'the-five-completions', gloss: 'The Last God — not a deity but the ultimate encounter that hints without disclosing' },
+  'der riss': { essay: 'the-five-completions', gloss: 'The rift — the creative tension between earth and world' },
+  'bauen': { essay: '06-dwelling-in-the-digital-age', gloss: 'Building — from the Old High German buan, to dwell' },
+  'bauen wohnen denken': { essay: '06-dwelling-in-the-digital-age', gloss: 'Building Dwelling Thinking — Heidegger\'s 1951 lecture' },
+  'bauen, wohnen, denken': { essay: '06-dwelling-in-the-digital-age', gloss: 'Building Dwelling Thinking — Heidegger\'s 1951 lecture' },
+  'the question concerning technology': { essay: '05-the-filter', gloss: 'Heidegger\'s 1953 lecture on technology as a mode of revealing' },
+  'seinsfrage': { essay: 'the-handedness-of-being', gloss: 'The question of Being — the fundamental question of philosophy' },
+  'gerede': { essay: 'the-handedness-of-being', gloss: 'Idle talk — inauthentic discourse that circulates without ground' },
+  'die sage': { essay: '05-the-filter', gloss: 'The Saying — language as the event of address, prior to any said content' },
+  'staunen': { essay: 'the-handedness-of-being', gloss: 'Wonder — the ground mood of philosophy' },
+  // Levinas
+  'totality and infinity': { essay: 'the-handedness-of-being', gloss: 'Levinas\'s 1961 masterwork on the ethical relation to the Other' },
+  // Agamben
+  'homo sacer': { essay: 'chirality-agamben', gloss: 'Sacred man — the figure who can be killed but not sacrificed, stripped of political life' },
+  'forma-di-vita': { essay: 'chirality-agamben', gloss: 'Form-of-life — a life inseparable from its form, where living and its mode are one' },
+  // Latin/general philosophical
+  'veritas, non auctoritas, facit legem.': { essay: '11-the-event-of-logic', gloss: 'Truth, not authority, makes law — Hobbes inverted' },
+  'veritas, non auctoritas, facit legem': { essay: '11-the-event-of-logic', gloss: 'Truth, not authority, makes law' },
+  'veritas non auctoritas facit legem.': { essay: '11-the-event-of-logic', gloss: 'Truth, not authority, makes law' },
+  'veritas, non auctoritas.': { essay: '11-the-event-of-logic', gloss: 'Truth, not authority' },
+  'sapere aude': { gloss: 'Dare to know — Kant\'s motto for Enlightenment' },
+  'sapere aude.': { gloss: 'Dare to know — Kant\'s motto for Enlightenment' },
+  'cogito ergo sum.': { gloss: 'I think therefore I am — Descartes\' foundational certainty' },
+  'foedus pacificum': { essay: 'the-cete', gloss: 'Kant\'s pacific federation — sovereignty preserved through voluntary cooperation' },
+  'cheir': { gloss: 'Greek: hand — the root of chirality' },
+  // Essay titles (current and former)
+  'the handedness of being': { essay: 'the-handedness-of-being' },
+  'the five completions': { essay: 'the-five-completions' },
+  'the beiträge completed': { essay: 'the-five-completions' },
+  'the chiral completion': { essay: 'the-chiral-completion' },
+  'the mycorrhizal turn': { essay: 'the-chiral-completion' },
+  'the filter': { essay: '05-the-filter' },
+  'the question concerning the filter': { essay: '05-the-filter' },
+  'the proof of love': { essay: 'the-proof-of-love' },
+  'the passage': { essay: 'the-passage' },
+  'der übergang': { essay: 'the-passage', gloss: 'The passage — the crossing between worlds' },
+  'tuesday in the clearing': { essay: 'tuesday-in-the-clearing' },
+  'the cete': { essay: 'the-cete' },
+  'mitsein at last': { essay: 'the-cete' },
+  'chirality and agamben': { essay: 'chirality-agamben' },
+  'the sovereign hand': { essay: 'chirality-agamben' },
+  'the chiral pedagogy': { essay: 'chiral-pedagogy' },
+  'dwelling with the other hand': { essay: 'chiral-pedagogy' },
+  'dwelling in the digital age': { essay: '06-dwelling-in-the-digital-age' },
+  'building dwelling thinking again': { essay: '06-dwelling-in-the-digital-age' },
+  'the event of logic': { essay: '11-the-event-of-logic' },
+  'the question concerning care': { essay: 'care-can-now-be-proved' },
+  'theses on chirality': { essay: 'theses-on-chirality' },
+  'the constellation': { essay: 'the-constellation' },
+  'the encounter': { essay: 'chirality' },
+  'theses on feuerbach': { gloss: 'Marx\'s eleven theses (1845) — "Philosophers have only interpreted the world..."' },
+  'remnants of auschwitz': { essay: 'chirality-agamben', gloss: 'Agamben\'s meditation on testimony, the witness, and the Muselmann' },
 }
 
 function setupIntro(onComplete: () => void): void {
@@ -179,39 +219,52 @@ function linkifyTerms(container: Element): void {
     const lower = text.toLowerCase().replace(/[""]/g, '"').replace(/['']/g, "'")
 
     // Try exact match, then without trailing punctuation
-    let essayId = TERM_ESSAY_MAP[lower]
-    if (!essayId) {
+    let data = TERM_DATA[lower]
+    if (!data) {
       const stripped = lower.replace(/[.,;:!?]$/, '').trim()
-      essayId = TERM_ESSAY_MAP[stripped]
+      data = TERM_DATA[stripped]
     }
 
-    if (!essayId) continue
+    if (!data) continue
 
-    const link = document.createElement('a')
-    link.className = 'term-link'
-    link.textContent = text
-    link.href = '#'
-    link.dataset.essayId = essayId
+    const essayId = data.essay
 
-    link.addEventListener('mouseenter', () => {
-      if (currentRenderer) {
-        currentRenderer.resetTrace(essayId)
-        currentRenderer.highlightedNodeId = essayId
-      }
-    })
+    if (essayId) {
+      // Clickable link to essay
+      const link = document.createElement('a')
+      link.className = 'term-link'
+      link.textContent = text
+      link.href = '#'
+      link.dataset.essayId = essayId
+      if (data.gloss) link.title = data.gloss
 
-    link.addEventListener('mouseleave', () => {
-      if (currentRenderer) {
-        currentRenderer.highlightedNodeId = null
-      }
-    })
+      link.addEventListener('mouseenter', () => {
+        if (currentRenderer) {
+          currentRenderer.resetTrace(essayId)
+          currentRenderer.highlightedNodeId = essayId
+        }
+      })
 
-    link.addEventListener('click', (e) => {
-      e.preventDefault()
-      openEssay(essayId)
-    })
+      link.addEventListener('mouseleave', () => {
+        if (currentRenderer) {
+          currentRenderer.highlightedNodeId = null
+        }
+      })
 
-    em.replaceWith(link)
+      link.addEventListener('click', (e) => {
+        e.preventDefault()
+        openEssay(essayId)
+      })
+
+      em.replaceWith(link)
+    } else if (data.gloss) {
+      // Glossary-only term — tooltip but no link
+      const span = document.createElement('span')
+      span.className = 'term-gloss'
+      span.textContent = text
+      span.title = data.gloss
+      em.replaceWith(span)
+    }
   }
 }
 

@@ -332,13 +332,22 @@ body.graph-active {
   font-style: italic;
   text-decoration: none;
   cursor: pointer;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s ease, text-shadow 0.2s ease;
+  border-bottom: 1px dotted var(--orange-dim);
+  transition: border-color 0.2s ease, text-shadow 0.2s ease, color 0.2s ease;
 }
 
 .reader-content .term-link:hover {
+  border-bottom-style: solid;
   border-bottom-color: var(--orange);
   text-shadow: 0 0 8px var(--orange);
+  color: #fff;
+}
+
+.reader-content .term-gloss {
+  color: var(--orange);
+  font-style: italic;
+  border-bottom: 1px dotted var(--text-dim);
+  cursor: help;
 }
 
 .reader-content hr {
