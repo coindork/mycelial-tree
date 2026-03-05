@@ -1,7 +1,6 @@
-import { computeLayout, BOOK_ORDER, CRYPTO_ORDER } from './graph/force'
-import { MoleculeRenderer } from './graph/renderer'
-import type { PositionedNode } from './graph/force'
-import type { GraphData } from './data/types'
+import { computeLayout, MoleculeRenderer, fetchRemoteGraph, identifyGhosts, mergeForAtlas } from '@vora/mycelial-engine'
+import type { PositionedNode, GraphData } from '@vora/mycelial-engine'
+import { CHIRALITY_CONFIG, GHOST_CONFIG, CRYPTO_REMOTE_CONFIG } from './config'
 
 // Philosophical terms: essay link + glossary definition
 interface TermData { essay?: string; gloss?: string }
@@ -171,13 +170,13 @@ function setupIntro(onComplete: () => void): void {
   }
 }
 
-function buildSidebar(nodes: PositionedNode[], renderer: MoleculeRenderer, cluster: 'chirality' | 'cryptosovereignty' = 'chirality'): void {
+function buildSidebar(nodes: PositionedNode[], renderer: MoleculeRenderer): void {
   const list = document.querySelector('.sidebar-list')!
   const heading = document.querySelector('.sidebar-heading')!
   list.innerHTML = ''
 
-  const order = cluster === 'chirality' ? BOOK_ORDER : CRYPTO_ORDER
-  heading.textContent = cluster === 'chirality' ? 'Reading Order' : 'Book Chapters'
+  const order = CHIRALITY_CONFIG.readingOrder
+  heading.textContent = 'Reading Order'
 
   // Filter nodes to this cluster's order and sort by position in that order
   const orderMap = new Map(order.map((id, i) => [id, i + 1]))
@@ -311,18 +310,25 @@ function showSidebar(): void {
 }
 
 function setupClusterNav(nodes: PositionedNode[], renderer: MoleculeRenderer): void {
-  let activeCluster: 'chirality' | 'cryptosovereignty' = 'chirality'
+  let activeMode: 'chirality' | 'atlas' = 'chirality'
   const nav = document.getElementById('cluster-nav')!
-  const labels = nav.querySelectorAll('.cluster-label')
+  const labels = nav.querySelectorAll('.cluster-label[data-cluster]')
 
   labels.forEach(label => {
     label.addEventListener('click', () => {
-      const cluster = (label as HTMLElement).dataset.cluster as 'chirality' | 'cryptosovereignty'
-      if (cluster === activeCluster) return
+      const mode = (label as HTMLElement).dataset.cluster as 'chirality' | 'atlas'
+      if (mode === activeMode) return
 
-      activeCluster = cluster
-      renderer.travelToCluster(cluster)
-      buildSidebar(nodes, renderer, cluster)
+      activeMode = mode
+
+      if (mode === 'chirality') {
+        renderer.travelToCluster('chirality')
+        buildSidebar(nodes, renderer)
+      } else if (mode === 'atlas') {
+        // Atlas mode rendering will be wired in Tasks 11-14
+        renderer.travelToCluster('chirality') // placeholder
+        console.log('Atlas mode not yet implemented')
+      }
 
       // Update active label
       labels.forEach(l => l.classList.remove('active'))
@@ -337,14 +343,24 @@ async function init(): Promise<void> {
   const data: GraphData = await resp.json()
 
   const container = document.getElementById('graph-container')!
-  const renderer = new MoleculeRenderer(container)
+  const renderer = new MoleculeRenderer(container, CHIRALITY_CONFIG)
   currentRenderer = renderer
 
-  const nodes = computeLayout(data)
+  const nodes = computeLayout(data, [CHIRALITY_CONFIG])
   renderer.buildScene(nodes, data.edges)
-  buildSidebar(nodes, renderer, 'chirality')
+  buildSidebar(nodes, renderer)
   setupReader()
   setupClusterNav(nodes, renderer)
+
+  // Fetch ghost nodes from the remote constellation (non-blocking)
+  fetchRemoteGraph(GHOST_CONFIG.remoteGraphUrl).then(remoteData => {
+    if (!remoteData) return
+    const { ghostNodes, ghostEdges } = identifyGhosts(data, remoteData, GHOST_CONFIG)
+    if (ghostNodes.length === 0) return
+    // Ghost nodes will be rendered once the renderer supports addGhostNodes
+    // For now, store them for later use
+    console.log(`Found ${ghostNodes.length} ghost nodes from cryptosovereignty`)
+  })
 
   // Sidebar pulse sync — update active item glow in sync with renderer
   function syncSidebarPulse(): void {

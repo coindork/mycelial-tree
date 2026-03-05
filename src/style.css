@@ -393,3 +393,11 @@ body.graph-active {
   color: var(--text-dim);
   font-style: italic;
 }
+
+/* === GHOST NODES === */
+.ghost-node {
+  transition: opacity 0.4s ease;
+}
+.ghost-node:hover {
+  opacity: 0.5 !important;
+}
