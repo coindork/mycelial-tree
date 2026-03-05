@@ -12,8 +12,8 @@ const FEATURED_NODE_ID = 'the-constellation'
 // Hand → color mapping
 const HAND_COLORS: Record<string, number> = {
   left: 0xF7931A,   // amber
-  right: 0x4A9EF7,  // cool blue
-  both: 0xD4A853,   // warm gold (split)
+  right: 0xF7931A,  // amber (unified palette)
+  both: 0xD4A853,   // warm gold
 }
 
 function handColor(hand: string): number {
@@ -141,8 +141,8 @@ export class MoleculeRenderer {
       div.dataset.nodeId = node.id
 
       const fontSize = isFeatured
-        ? 18
-        : Math.max(9, 7 + node.connectionCount * 1.2)
+        ? 20
+        : Math.min(16, Math.max(9, 7 + node.connectionCount * 1.2))
       div.style.fontSize = `${fontSize}px`
       div.style.color = colorHex
       div.style.opacity = isFeatured ? '0.9' : '0.45'
@@ -263,15 +263,15 @@ export class MoleculeRenderer {
 
     if (this.highlightedNodeId) return
 
-    // "Both" hand nodes flicker between amber and blue
+    // "Both" hand nodes pulse between amber and gold
     for (const [id, div] of this.labelElements) {
       const hand = this.nodeHands.get(id) || 'left'
       if (hand === 'both') {
         const t = 0.5 + 0.5 * Math.sin(time * 0.8 + id.length)
-        // Interpolate between amber and blue
-        const r = Math.round(247 * (1 - t * 0.3) + 74 * t * 0.3)
-        const g = Math.round(147 * (1 - t * 0.3) + 158 * t * 0.3)
-        const b = Math.round(26 * (1 - t * 0.3) + 247 * t * 0.3)
+        // Interpolate between amber (#F7931A) and gold (#D4A853)
+        const r = Math.round(247 + (212 - 247) * t * 0.4)
+        const g = Math.round(147 + (168 - 147) * t * 0.4)
+        const b = Math.round(26 + (83 - 26) * t * 0.4)
         div.style.color = `rgb(${r}, ${g}, ${b})`
       }
     }

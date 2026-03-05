@@ -7,18 +7,9 @@ connects_to:
   - the-handedness-of-being.md
   - the-five-completions.md
   - the-chiral-completion.md
-  - chirality.md
   - the-proof-of-love.md
-  - care-can-now-be-proved.md
-  - 11-the-event-of-logic.md
-  - tuesday-in-the-clearing.md
-  - the-cete.md
-  - chirality-agamben.md
-  - chiral-pedagogy.md
   - 05-the-filter.md
-  - 06-dwelling-in-the-digital-age.md
-  - the-passage.md
-  - theses-on-chirality.md
+  - the-cete.md
 layer: surface
 hand: both
 ---

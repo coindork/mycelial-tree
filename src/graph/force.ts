@@ -74,24 +74,22 @@ export function computeLayout(data: GraphData): PositionedNode[] {
       d3.forceLink<ForceNode, ForceEdge>(edges)
         .id((d) => d.id)
         .distance((d) => {
-          // Strongly connected nodes cluster tight
           const weight = (d as ForceEdge).weight
-          return weight >= 3 ? 25 : 45
+          return weight >= 3 ? 35 : 55
         })
-        .strength(0.6)
+        // Let d3 auto-weaken links for high-degree nodes
     )
     .force(
       'charge',
-      d3.forceManyBody<ForceNode>().strength(-80)
+      d3.forceManyBody<ForceNode>().strength(-180)
     )
-    .force('center', d3.forceCenter(0, 0).strength(0.03))
+    .force('center', d3.forceCenter(0, 0).strength(0.02))
     .force(
       'collision',
       d3.forceCollide<ForceNode>().radius((d) => {
-        // Bigger collision radius for bigger nodes — word cloud spacing
         const r = 2 + d.connectionCount * 0.8
-        return r * 3 + 8
-      }).strength(0.9)
+        return r * 3 + 12
+      }).strength(0.8)
     )
     .stop()
 

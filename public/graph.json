@@ -17,7 +17,7 @@
       "layer": "surface",
       "hand": "left",
       "ghost": false,
-      "connectionCount": 3
+      "connectionCount": 4
     },
     {
       "id": "06-dwelling-in-the-digital-age",
@@ -38,7 +38,7 @@
       "layer": "surface",
       "hand": "both",
       "ghost": false,
-      "connectionCount": 9
+      "connectionCount": 10
     },
     {
       "id": "11-the-event-of-logic",
@@ -75,7 +75,7 @@
       "layer": "surface",
       "hand": "left",
       "ghost": false,
-      "connectionCount": 7
+      "connectionCount": 8
     },
     {
       "id": "chiral-pedagogy",
@@ -97,7 +97,7 @@
       "layer": "surface",
       "hand": "both",
       "ghost": false,
-      "connectionCount": 4
+      "connectionCount": 5
     },
     {
       "id": "chirality-agamben",
@@ -153,7 +153,7 @@
       "layer": "surface",
       "hand": "right",
       "ghost": false,
-      "connectionCount": 1
+      "connectionCount": 2
     },
     {
       "id": "the-chiral-completion",
@@ -173,7 +173,28 @@
       "layer": "surface",
       "hand": "both",
       "ghost": false,
-      "connectionCount": 7
+      "connectionCount": 8
+    },
+    {
+      "id": "the-constellation",
+      "title": "The Constellation",
+      "subtitle": "Fifteen essays, five wounds, one completion",
+      "concepts": [
+        "chirality",
+        "Heidegger",
+        "Ereignis",
+        "Mitsein",
+        "fourfold",
+        "Gestell",
+        "Levinas",
+        "Wu",
+        "dwelling",
+        "completion"
+      ],
+      "layer": "surface",
+      "hand": "both",
+      "ghost": false,
+      "connectionCount": 11
     },
     {
       "id": "the-five-completions",
@@ -193,7 +214,7 @@
       "layer": "surface",
       "hand": "left",
       "ghost": false,
-      "connectionCount": 5
+      "connectionCount": 6
     },
     {
       "id": "the-handedness-of-being",
@@ -213,7 +234,7 @@
       "layer": "surface",
       "hand": "left",
       "ghost": false,
-      "connectionCount": 11
+      "connectionCount": 12
     },
     {
       "id": "the-passage",
@@ -249,7 +270,7 @@
       "layer": "surface",
       "hand": "left",
       "ghost": false,
-      "connectionCount": 6
+      "connectionCount": 7
     },
     {
       "id": "theses-on-chirality",
@@ -271,7 +292,7 @@
       "layer": "surface",
       "hand": "both",
       "ghost": false,
-      "connectionCount": 10
+      "connectionCount": 11
     },
     {
       "id": "tuesday-in-the-clearing",
@@ -289,7 +310,7 @@
       "layer": "surface",
       "hand": "left",
       "ghost": false,
-      "connectionCount": 5
+      "connectionCount": 6
     }
   ],
   "edges": [
@@ -456,6 +477,42 @@
       "type": "explicit"
     },
     {
+      "source": "the-constellation",
+      "target": "the-handedness-of-being",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-constellation",
+      "target": "the-five-completions",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-constellation",
+      "target": "the-chiral-completion",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-constellation",
+      "target": "the-proof-of-love",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-constellation",
+      "target": "05-the-filter",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
+      "source": "the-constellation",
+      "target": "the-cete",
+      "weight": 3,
+      "type": "explicit"
+    },
+    {
       "source": "the-five-completions",
       "target": "the-handedness-of-being",
       "weight": 3,
@@ -523,7 +580,37 @@
     },
     {
       "source": "06-dwelling-in-the-digital-age",
+      "target": "the-constellation",
+      "weight": 2,
+      "type": "conceptual"
+    },
+    {
+      "source": "06-dwelling-in-the-digital-age",
       "target": "theses-on-chirality",
+      "weight": 2,
+      "type": "conceptual"
+    },
+    {
+      "source": "care-can-now-be-proved",
+      "target": "the-constellation",
+      "weight": 2,
+      "type": "conceptual"
+    },
+    {
+      "source": "chiral-pedagogy",
+      "target": "the-constellation",
+      "weight": 2,
+      "type": "conceptual"
+    },
+    {
+      "source": "the-constellation",
+      "target": "theses-on-chirality",
+      "weight": 2,
+      "type": "conceptual"
+    },
+    {
+      "source": "the-constellation",
+      "target": "tuesday-in-the-clearing",
       "weight": 2,
       "type": "conceptual"
     },
