@@ -3,7 +3,7 @@ import type { PositionedNode, GraphData } from '@vora/mycelial-engine'
 import { CHIRALITY_CONFIG, GHOST_CONFIG, CRYPTO_REMOTE_CONFIG } from './config'
 
 // Philosophical terms: essay link + glossary definition
-interface TermData { essay?: string; gloss?: string }
+interface TermData { essay?: string; gloss?: string; external?: string }
 const TERM_DATA: Record<string, TermData> = {
   // Core Heideggerian vocabulary
   'chirality': { essay: 'chirality', gloss: 'Handedness — the property of an object that cannot be superimposed on its mirror image' },
@@ -88,16 +88,16 @@ const TERM_DATA: Record<string, TermData> = {
   'the encounter': { essay: 'chirality' },
   'theses on feuerbach': { gloss: 'Marx\'s eleven theses (1845) — "Philosophers have only interpreted the world..."' },
   'remnants of auschwitz': { essay: 'chirality-agamben', gloss: 'Agamben\'s meditation on testimony, the witness, and the Muselmann' },
-  // Cryptosovereignty vocabulary
-  'cryptosovereignty': { essay: '01-cryptosovereignty', gloss: 'The sovereign power of cryptography — legitimacy grounded in mathematical truth' },
-  'veritas non auctoritas': { essay: '01-cryptosovereignty', gloss: 'Truth, not authority, makes law — the inversion of Hobbes' },
-  'leviathan': { essay: '07-the-sovereign-the-subject', gloss: 'Hobbes\' absolute sovereign — the political form Bitcoin replaces' },
-  'partisan': { essay: '16-theory-of-the-crypto-partisan', gloss: 'The irregular fighter — the crypto-partisan operates in deterritorialized digital space' },
-  'messianic': { essay: '12-messianic-bitcoin', gloss: 'Benjamin\'s weak messianic power — the redemptive force hidden in Bitcoin' },
-  'eidgenossenschaft': { essay: 'ext-the-solitary-sovereign', gloss: 'Oath-fellowship — sovereign beings swearing mutual aid without surrendering sovereignty' },
-  'sovereign mutualism': { essay: 'ext-sovereign-mutualism', gloss: 'Federation of sovereign clearings, each strengthened by every other' },
-  'the clearing': { essay: 'ext-first-philosophy', gloss: 'Heidegger\'s Lichtung — the space where truth presences, kept open by refusal to fill it' },
-  'sovereign stack': { essay: 'ext-first-philosophy', gloss: 'Value \u2192 Communication \u2192 Cognition \u2192 Peoplehood — the four clearings' },
+  // Cryptosovereignty vocabulary — cross-site links
+  'cryptosovereignty': { essay: '01-cryptosovereignty', gloss: 'The sovereign power of cryptography — legitimacy grounded in mathematical truth', external: 'https://coindork.github.io/cryptosovereignty/' },
+  'veritas non auctoritas': { essay: '01-cryptosovereignty', gloss: 'Truth, not authority, makes law — the inversion of Hobbes', external: 'https://coindork.github.io/cryptosovereignty/' },
+  'leviathan': { essay: '07-the-sovereign-the-subject', gloss: 'Hobbes\' absolute sovereign — the political form Bitcoin replaces', external: 'https://coindork.github.io/cryptosovereignty/' },
+  'partisan': { essay: '16-theory-of-the-crypto-partisan', gloss: 'The irregular fighter — the crypto-partisan operates in deterritorialized digital space', external: 'https://coindork.github.io/cryptosovereignty/' },
+  'messianic': { essay: '12-messianic-bitcoin', gloss: 'Benjamin\'s weak messianic power — the redemptive force hidden in Bitcoin', external: 'https://coindork.github.io/cryptosovereignty/' },
+  'eidgenossenschaft': { essay: 'ext-the-solitary-sovereign', gloss: 'Oath-fellowship — sovereign beings swearing mutual aid without surrendering sovereignty', external: 'https://coindork.github.io/cryptosovereignty/' },
+  'sovereign mutualism': { essay: 'ext-sovereign-mutualism', gloss: 'Federation of sovereign clearings, each strengthened by every other', external: 'https://coindork.github.io/cryptosovereignty/' },
+  'the clearing': { essay: '06-dwelling-in-the-digital-age', gloss: 'Heidegger\'s Lichtung — the space where truth presences, kept open by refusal to fill it' },
+  'sovereign stack': { essay: 'ext-first-philosophy', gloss: 'Value \u2192 Communication \u2192 Cognition \u2192 Peoplehood — the four clearings', external: 'https://coindork.github.io/cryptosovereignty/' },
 }
 
 function setupIntro(onComplete: () => void): void {
@@ -273,7 +273,11 @@ function linkifyTerms(container: Element): void {
 
       link.addEventListener('click', (e) => {
         e.preventDefault()
-        openEssay(essayId)
+        if (data.external) {
+          window.location.href = data.external + '#' + essayId
+        } else {
+          openEssay(essayId)
+        }
       })
 
       em.replaceWith(link)
@@ -365,15 +369,27 @@ async function init(): Promise<void> {
 
   const nodes = computeLayout(data, [CHIRALITY_CONFIG])
   renderer.buildScene(nodes, data.edges)
+  renderer.onNodeClick = (nodeId) => {
+    if (ghostIds.has(nodeId)) {
+      window.location.href = `${GHOST_CONFIG.remoteSiteUrl}#${nodeId}`
+      return
+    }
+    renderer.focusNode(nodeId)
+    openEssay(nodeId)
+  }
   buildSidebar(nodes, renderer)
   setupReader()
   setupClusterNav(nodes, renderer, data)
+
+  // Track ghost node IDs so click handler can route to remote site
+  const ghostIds = new Set<string>()
 
   // Fetch ghost nodes from the remote constellation (non-blocking)
   fetchRemoteGraph(GHOST_CONFIG.remoteGraphUrl).then(remoteData => {
     if (!remoteData) return
     const { ghostNodes, ghostEdges } = identifyGhosts(data, remoteData, GHOST_CONFIG)
     if (ghostNodes.length === 0) return
+    for (const g of ghostNodes) ghostIds.add(g.id)
     // Position ghost nodes: run layout with both sets, extract ghost positions
     const allNodes = [...data.nodes, ...ghostNodes]
     const allEdges = [...data.edges, ...ghostEdges]
@@ -409,4 +425,10 @@ async function init(): Promise<void> {
   }
 }
 
-init()
+init().catch(err => {
+  console.error('Initialization failed:', err)
+  const container = document.getElementById('graph-container')
+  if (container) {
+    container.innerHTML = '<p style="color:#888;padding:2rem;font-family:system-ui;">Could not load visualization. Please try refreshing the page.</p>'
+  }
+})

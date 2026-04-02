@@ -32,6 +32,7 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "@vora/mycelial-engine": "file:./engine",
     "d3": "^7.9.0",
     "gray-matter": "^4.0.3",
     "marked": "^17.0.4",
